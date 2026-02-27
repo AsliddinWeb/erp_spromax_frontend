@@ -1,59 +1,47 @@
 <template>
-  <div class="bg-white dark:bg-dark-800 rounded-2xl p-5 border border-gray-100 dark:border-dark-border hover:shadow-md transition-shadow">
-    <div class="flex items-start justify-between mb-4">
-      <div class="w-10 h-10 rounded-xl flex items-center justify-center" :class="bgClass">
-        <component :is="iconComponent" class="w-5 h-5" :class="iconClass" />
+  <div class="p-4 rounded-xl bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-border">
+    <div class="flex items-start justify-between">
+      <div class="flex-1 min-w-0">
+        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ label }}</p>
+        <p class="text-xl font-bold mt-1 truncate" :class="valueClass">
+          {{ value }}<span v-if="unit" class="text-sm font-normal text-gray-500 ml-1">{{ unit }}</span>
+        </p>
+        <p v-if="sub" class="text-xs text-gray-400 mt-0.5">{{ sub }}</p>
       </div>
-      <AppBadge v-if="badge" :variant="trendType || badgeType">{{ badge }}</AppBadge>
-      <AppBadge v-else-if="trend" :variant="trendType">{{ trend }}</AppBadge>
+      <div
+        v-if="icon"
+        class="w-9 h-9 rounded-lg flex items-center justify-center ml-2 flex-shrink-0"
+        :class="iconBg"
+      >
+        <component :is="icon" class="w-4 h-4" :class="iconColor" />
+      </div>
     </div>
-    <div class="text-2xl font-bold text-gray-900 dark:text-white">
-      {{ value ?? '—' }}
-    </div>
-    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ label }}</div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import {
-  Banknote, ShoppingCart, Users, Factory, TrendingUp,
-  UserCheck, PackageX, Wrench, BarChart3, Clock,
-  CheckCircle, AlertCircle, Package, DollarSign
-} from 'lucide-vue-next'
-import AppBadge from '@/components/ui/AppBadge.vue'
 
 const props = defineProps({
-  icon:      { type: String, default: 'BarChart3' },
-  label:     { type: String, required: true },
-  value:     { type: [String, Number], default: null },
-  trend:     { type: String, default: '' },
-  trendType: { type: String, default: 'success' },
-  badge:     { type: String, default: '' },
-  badgeType: { type: String, default: 'info' },
-  color:     { type: String, default: 'primary' },
-  // primary | success | warning | danger
+  label: String,
+  value: [String, Number],
+  unit: String,
+  sub: String,
+  color: { type: String, default: 'primary' },
+  icon: { type: [Object, Function], default: null },
 })
 
-const iconMap = {
-  Banknote, ShoppingCart, Users, Factory, TrendingUp,
-  UserCheck, PackageX, Wrench, BarChart3, Clock,
-  CheckCircle, AlertCircle, Package, DollarSign
+const colorMap = {
+  primary: { value: 'text-primary', bg: 'bg-primary/10', icon: 'text-primary' },
+  success: { value: 'text-success', bg: 'bg-success/10', icon: 'text-success' },
+  warning: { value: 'text-warning', bg: 'bg-warning/10', icon: 'text-warning' },
+  danger:  { value: 'text-danger',  bg: 'bg-danger/10',  icon: 'text-danger'  },
+  info:    { value: 'text-info',    bg: 'bg-info/10',    icon: 'text-info'    },
+  default: { value: 'text-gray-900 dark:text-white', bg: 'bg-gray-100 dark:bg-dark-700', icon: 'text-gray-500' },
 }
 
-const iconComponent = computed(() => iconMap[props.icon] || BarChart3)
-
-const bgClass = computed(() => ({
-  primary: 'bg-primary/10',
-  success: 'bg-success/10',
-  warning: 'bg-warning/10',
-  danger:  'bg-danger/10',
-}[props.color]))
-
-const iconClass = computed(() => ({
-  primary: 'text-primary',
-  success: 'text-success',
-  warning: 'text-warning',
-  danger:  'text-danger',
-}[props.color]))
+const c = computed(() => colorMap[props.color] || colorMap.default)
+const valueClass = computed(() => c.value.value)
+const iconBg = computed(() => c.value.bg)
+const iconColor = computed(() => c.value.icon)
 </script>

@@ -21,29 +21,29 @@
     </div>
 
     <!-- Skeleton -->
-    <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div v-if="loading" class="grid grid-cols-2 xl:grid-cols-4 gap-4">
       <div v-for="i in 4" :key="i" class="h-28 rounded-2xl bg-gray-100 dark:bg-dark-700 animate-pulse"></div>
     </div>
 
     <!-- Stat kartochkalar -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div v-else class="grid grid-cols-2 xl:grid-cols-4 gap-4">
 
       <StatCard
-        icon="Factory"
+        :icon="Factory"
         label="Faol smenalar"
         :value="data?.active_shifts"
         color="primary"
       />
 
       <StatCard
-        icon="Package"
+        :icon="Package"
         label="Bugungi mahsulot"
         :value="data?.total_output_today"
         color="success"
       />
 
       <StatCard
-        icon="AlertCircle"
+        :icon="AlertCircle"
         label="Bugungi brak"
         :value="data?.total_defects_today"
         :badge="data?.total_defects_today > 0 ? 'Diqqat!' : 'Yaxshi'"
@@ -52,7 +52,7 @@
       />
 
       <StatCard
-        icon="BarChart3"
+        :icon="BarChart3"
         label="Ishlab chiqarish liniyalari"
         :value="data?.total_production_lines"
         color="warning"

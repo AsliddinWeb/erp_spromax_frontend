@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Xom ashyolar</h3>
       <AppButton
         v-if="hasRole(['superadmin','admin','director','warehouse_manager'])"
@@ -13,7 +13,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="flex gap-3 flex-wrap">
+    <div class="flex flex-col sm:flex-row gap-3">
       <AppInput
         v-model="search"
         placeholder="Nomi bo'yicha qidirish..."

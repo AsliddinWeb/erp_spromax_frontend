@@ -21,15 +21,15 @@
     </div>
 
     <!-- Skeleton -->
-    <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div v-if="loading" class="grid grid-cols-2 xl:grid-cols-4 gap-4">
       <div v-for="i in 4" :key="i" class="h-28 rounded-2xl bg-gray-100 dark:bg-dark-700 animate-pulse"></div>
     </div>
 
     <!-- Stat kartochkalar -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div v-else class="grid grid-cols-2 xl:grid-cols-4 gap-4">
 
       <StatCard
-        icon="Users"
+        :icon="Users"
         label="Jami xodimlar"
         :value="data?.total_employees"
         :badge="data?.active_employees + ' faol'"
@@ -38,21 +38,21 @@
       />
 
       <StatCard
-        icon="UserCheck"
+        :icon="UserCheck"
         label="Ta'tilda"
         :value="data?.on_leave"
         color="warning"
       />
 
       <StatCard
-        icon="Banknote"
+        :icon="Banknote"
         label="Shu oy ish haqi"
         :value="formatMoney(data?.total_salary_paid_this_month)"
         color="success"
       />
 
       <StatCard
-        icon="BarChart3"
+        :icon="BarChart3"
         label="Davomat foizi"
         :value="data?.attendance_rate + '%'"
         color="primary"

@@ -21,15 +21,15 @@
     </div>
 
     <!-- Skeleton -->
-    <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div v-if="loading" class="grid grid-cols-2 xl:grid-cols-4 gap-4">
       <div v-for="i in 8" :key="i" class="h-28 rounded-2xl bg-gray-100 dark:bg-dark-700 animate-pulse"></div>
     </div>
 
     <!-- Stat kartochkalar -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div v-else class="grid grid-cols-2 xl:grid-cols-4 gap-4">
 
       <StatCard
-        icon="Banknote"
+        :icon="Banknote"
         label="Umumiy daromad"
         :value="formatMoney(data?.total_revenue)"
         trend="+12%"
@@ -38,14 +38,14 @@
       />
 
       <StatCard
-        icon="TrendingUp"
+        :icon="TrendingUp"
         label="Sof foyda"
         :value="formatMoney(data?.net_profit)"
         color="success"
       />
 
       <StatCard
-        icon="ShoppingCart"
+        :icon="ShoppingCart"
         label="Jami buyurtmalar"
         :value="data?.total_orders"
         :badge="data?.pending_orders + ' kutmoqda'"
@@ -54,7 +54,7 @@
       />
 
       <StatCard
-        icon="Users"
+        :icon="Users"
         label="Jami xodimlar"
         :value="data?.total_employees"
         :badge="data?.active_employees + ' faol'"
@@ -63,7 +63,7 @@
       />
 
       <StatCard
-        icon="Factory"
+        :icon="Factory"
         label="Bugungi mahsulot"
         :value="data?.total_output_today"
         :badge="data?.active_shifts + ' smena'"
@@ -72,14 +72,14 @@
       />
 
       <StatCard
-        icon="UserCheck"
+        :icon="UserCheck"
         label="Jami mijozlar"
         :value="data?.total_customers"
         color="warning"
       />
 
       <StatCard
-        icon="PackageX"
+        :icon="PackageX"
         label="Kam qoldiq materiallar"
         :value="data?.low_stock_materials"
         :badge="data?.low_stock_materials > 0 ? 'Diqqat!' : ''"
@@ -88,7 +88,7 @@
       />
 
       <StatCard
-        icon="Wrench"
+        :icon="Wrench"
         label="Ta'mirda mashinalar"
         :value="data?.machines_under_maintenance"
         :badge="data?.pending_maintenance + ' kutmoqda'"

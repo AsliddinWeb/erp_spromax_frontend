@@ -21,22 +21,22 @@
     </div>
 
     <!-- Skeleton -->
-    <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div v-if="loading" class="grid grid-cols-2 xl:grid-cols-4 gap-4">
       <div v-for="i in 4" :key="i" class="h-28 rounded-2xl bg-gray-100 dark:bg-dark-700 animate-pulse"></div>
     </div>
 
     <!-- Stat kartochkalar -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div v-else class="grid grid-cols-2 xl:grid-cols-4 gap-4">
 
       <StatCard
-        icon="Package"
+        :icon="Package"
         label="Jami xom-ashyolar"
         :value="data?.total_raw_materials"
         color="primary"
       />
 
       <StatCard
-        icon="PackageX"
+        :icon="PackageX"
         label="Kam qoldiq"
         :value="data?.low_stock_items_count"
         :badge="data?.low_stock_items_count > 0 ? 'Diqqat!' : 'Yaxshi'"
@@ -45,14 +45,14 @@
       />
 
       <StatCard
-        icon="Banknote"
+        :icon="Banknote"
         label="Ombor qiymati"
         :value="formatMoney(data?.total_stock_value)"
         color="success"
       />
 
       <StatCard
-        icon="Clock"
+        :icon="Clock"
         label="Kutilayotgan so'rovlar"
         :value="data?.pending_requests_count"
         :badge="data?.pending_requests_count > 0 ? 'Yangi' : ''"

@@ -2,7 +2,10 @@
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ish haqi to'lovlari</h3>
-      <AppButton @click="openCreate" :icon="Plus">To'lov qilish</AppButton>
+      <div class="flex gap-2">
+        <AppButton variant="primary" :icon="Calculator" @click="openBatchModal">Oylik hisoblash va to'lash</AppButton>
+        <AppButton variant="secondary" :icon="Plus" @click="openCreate">Yakka to'lov</AppButton>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -34,31 +37,19 @@
       <template #employee="{ value }">
         {{ value ? `${value.first_name} ${value.last_name}` : '—' }}
       </template>
-
       <template #total_amount="{ value }">
         <span class="font-semibold text-primary">{{ formatMoney(value) }}</span>
       </template>
-
-      <template #base_salary="{ value }">
-        {{ formatMoney(value) }}
-      </template>
-
+      <template #base_salary="{ value }">{{ formatMoney(value) }}</template>
       <template #bonus="{ value }">
-        <span :class="Number(value) > 0 ? 'text-success font-medium' : ''">
-          {{ formatMoney(value) }}
-        </span>
+        <span :class="Number(value) > 0 ? 'text-success font-medium' : ''">{{ formatMoney(value) }}</span>
       </template>
-
       <template #deductions="{ value }">
         <span :class="Number(value) > 0 ? 'text-danger font-medium' : ''">
           {{ Number(value) > 0 ? '-' : '' }}{{ formatMoney(value) }}
         </span>
       </template>
-
-      <template #payment_date="{ value }">
-        {{ formatDate(value) }}
-      </template>
-
+      <template #payment_date="{ value }">{{ formatDate(value) }}</template>
       <template #payment_method="{ value }">
         <AppBadge variant="default">{{ methodLabel(value) }}</AppBadge>
       </template>
@@ -66,16 +57,117 @@
 
     <AppPagination :page="page" :limit="limit" :total="total" @change="onPageChange" />
 
-    <!-- Create Modal -->
+    <!-- ===== BATCH OYLIK MODAL ===== -->
+    <AppModal v-model="showBatchModal" title="Oylik hisoblash va to'lash" size="xl">
+      <div class="space-y-4">
+        <!-- Oy tanlash -->
+        <div class="flex items-end gap-3">
+          <AppInput
+            v-model="batchMonth"
+            label="Oy"
+            type="month"
+            class="w-48"
+          />
+          <AppButton :loading="previewLoading" :icon="Search" @click="loadPreview">Hisoblash</AppButton>
+        </div>
+
+        <!-- Preview jadval -->
+        <div v-if="previewData.length > 0">
+          <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-dark-border">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 dark:bg-dark-800">
+                <tr>
+                  <th class="px-3 py-2.5 text-left font-medium text-gray-600 dark:text-gray-300">Xodim</th>
+                  <th class="px-3 py-2.5 text-left font-medium text-gray-600 dark:text-gray-300">Bo'lim</th>
+                  <th class="px-3 py-2.5 text-right font-medium text-gray-600 dark:text-gray-300">Ish haqi</th>
+                  <th class="px-3 py-2.5 text-center font-medium text-gray-600 dark:text-gray-300">Ta'til</th>
+                  <th class="px-3 py-2.5 text-right font-medium text-danger">Chegirma</th>
+                  <th class="px-3 py-2.5 text-right font-medium text-success">Bonus</th>
+                  <th class="px-3 py-2.5 text-right font-medium text-primary">Jami</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-dark-border">
+                <tr
+                  v-for="(item, idx) in previewData"
+                  :key="item.employee_id"
+                  class="hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors"
+                >
+                  <td class="px-3 py-2.5 font-medium text-gray-900 dark:text-white">{{ item.full_name }}</td>
+                  <td class="px-3 py-2.5 text-gray-600 dark:text-gray-400">{{ item.department }}</td>
+                  <td class="px-3 py-2.5 text-right text-gray-700 dark:text-gray-300">{{ formatMoney(item.base_salary) }}</td>
+                  <td class="px-3 py-2.5 text-center">
+                    <span v-if="item.unpaid_leave_days > 0" class="text-danger font-medium">
+                      {{ item.unpaid_leave_days }} kun
+                    </span>
+                    <span v-else class="text-gray-400">—</span>
+                  </td>
+                  <td class="px-3 py-2.5 text-right text-danger font-medium">
+                    {{ item.deduction > 0 ? '-' + formatMoney(item.deduction) : '—' }}
+                  </td>
+                  <td class="px-3 py-2.5 text-right">
+                    <input
+                      type="number"
+                      v-model="batchBonuses[idx]"
+                      class="w-24 text-right rounded border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-800 px-2 py-1 text-sm text-success focus:outline-none focus:ring-1 focus:ring-primary"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </td>
+                  <td class="px-3 py-2.5 text-right font-bold text-primary">
+                    {{ formatMoney(computedTotal(item, idx)) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Jami summa -->
+          <div class="mt-3 p-3 rounded-lg bg-primary/10 flex justify-between items-center">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Jami {{ previewData.length }} xodimga:
+            </span>
+            <span class="text-xl font-bold text-primary">{{ formatMoney(grandTotal) }}</span>
+          </div>
+        </div>
+
+        <div v-else-if="previewLoaded" class="py-8 text-center text-gray-400 text-sm">
+          Bu oy uchun aktiv xodimlar topilmadi
+        </div>
+      </div>
+
+      <template #footer>
+        <AppButton variant="secondary" @click="showBatchModal = false">Bekor qilish</AppButton>
+        <AppButton
+          v-if="previewData.length > 0"
+          variant="success"
+          :loading="batchSaving"
+          :icon="CheckCircle"
+          @click="confirmBatch"
+        >
+          Hammasiga to'lash ({{ previewData.length }} xodim)
+        </AppButton>
+      </template>
+    </AppModal>
+
+    <!-- Confirm Dialog -->
+    <AppModal v-model="showConfirm" title="Tasdiqlash" size="sm">
+      <div class="space-y-3 text-sm">
+        <p class="text-gray-700 dark:text-gray-300">
+          <strong>{{ batchMonth }}</strong> oyi uchun <strong>{{ previewData.length }} xodimga</strong>
+          jami <strong class="text-primary">{{ formatMoney(grandTotal) }}</strong> to'lanadi.
+        </p>
+        <p class="text-warning text-xs">Bu amalni bekor qilib bo'lmaydi!</p>
+      </div>
+      <template #footer>
+        <AppButton variant="secondary" @click="showConfirm = false">Bekor</AppButton>
+        <AppButton variant="danger" :loading="batchSaving" @click="executeBatch">Ha, to'lash</AppButton>
+      </template>
+    </AppModal>
+
+    <!-- Yakka to'lov Modal -->
     <AppModal v-model="showCreateModal" title="Ish haqi to'lovi" size="md">
       <form @submit.prevent="save" class="space-y-4">
-        <AppSelect
-          v-model="form.employee_id"
-          label="Xodim"
-          required
-          :options="employeeSelectOptions"
-          :error="errors.employee_id"
-        />
+        <AppSelect v-model="form.employee_id" label="Xodim" required :options="employeeSelectOptions" :error="errors.employee_id" />
         <div class="grid grid-cols-2 gap-4">
           <AppInput v-model="form.period_start" label="Davr boshlanishi" type="date" required :error="errors.period_start" />
           <AppInput v-model="form.period_end" label="Davr tugashi" type="date" required :error="errors.period_end" />
@@ -85,29 +177,18 @@
           <AppInput v-model="form.bonus" label="Bonus" type="number" placeholder="0" />
           <AppInput v-model="form.deductions" label="Chegirmalar" type="number" placeholder="0" />
         </div>
-
-        <!-- Total preview -->
         <div v-if="totalPreview > 0" class="p-3 rounded-lg bg-primary/10 flex justify-between items-center">
           <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Jami to'lov:</span>
           <span class="text-lg font-bold text-primary">{{ formatMoney(totalPreview) }}</span>
         </div>
-
         <div class="grid grid-cols-2 gap-4">
           <AppInput v-model="form.payment_date" label="To'lov sanasi" type="date" required :error="errors.payment_date" />
-          <AppSelect
-            v-model="form.payment_method"
-            label="To'lov usuli"
-            required
-            :options="methodOptions.filter(o => o.value)"
-          />
+          <AppSelect v-model="form.payment_method" label="To'lov usuli" required :options="methodOptions.filter(o => o.value)" />
         </div>
         <div class="space-y-1">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Izoh</label>
-          <textarea
-            v-model="form.notes"
-            rows="2"
-            class="w-full rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-          />
+          <textarea v-model="form.notes" rows="2"
+            class="w-full rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors" />
         </div>
       </form>
       <template #footer>
@@ -171,7 +252,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Plus } from 'lucide-vue-next'
+import { Plus, Calculator, Search, CheckCircle } from 'lucide-vue-next'
 import { hrApi } from '@/api'
 import { useToast } from '@/composables/useToast'
 import AppTable from '@/components/ui/AppTable.vue'
@@ -190,6 +271,8 @@ const loading = ref(false)
 const saving = ref(false)
 const showCreateModal = ref(false)
 const showDetailModal = ref(false)
+const showBatchModal = ref(false)
+const showConfirm = ref(false)
 const selectedPayment = ref(null)
 const employeeFilter = ref('')
 const methodFilter = ref('')
@@ -199,6 +282,14 @@ const page = ref(1)
 const limit = ref(20)
 const total = ref(0)
 const errors = ref({})
+
+// Batch
+const batchMonth = ref(new Date().toISOString().slice(0, 7))
+const previewData = ref([])
+const batchBonuses = ref([])
+const previewLoading = ref(false)
+const previewLoaded = ref(false)
+const batchSaving = ref(false)
 
 const now = new Date()
 const defaultForm = () => ({
@@ -258,6 +349,16 @@ const filteredData = computed(() => {
 const totalPaid = computed(() => filteredData.value.reduce((s, i) => s + Number(i.total_amount || 0), 0))
 const totalBonus = computed(() => filteredData.value.reduce((s, i) => s + Number(i.bonus || 0), 0))
 
+// Batch computed
+function computedTotal(item, idx) {
+  const bonus = Number(batchBonuses.value[idx]) || 0
+  return Number(item.base_salary) - Number(item.deduction) + bonus
+}
+
+const grandTotal = computed(() =>
+  previewData.value.reduce((sum, item, idx) => sum + computedTotal(item, idx), 0)
+)
+
 function methodLabel(m) {
   const map = { cash: 'Naqd', bank_transfer: 'Bank o\'tkazma', card: 'Karta' }
   return map[m] || m
@@ -298,6 +399,72 @@ function openCreate() {
 function openDetail(row) {
   selectedPayment.value = row
   showDetailModal.value = true
+}
+
+function openBatchModal() {
+  previewData.value = []
+  batchBonuses.value = []
+  previewLoaded.value = false
+  batchMonth.value = new Date().toISOString().slice(0, 7)
+  showBatchModal.value = true
+}
+
+async function loadPreview() {
+  if (!batchMonth.value) { toast.error('Oyni tanlang'); return }
+  previewLoading.value = true
+  previewLoaded.value = false
+  try {
+    const res = await hrApi.calculateSalaryPreview(batchMonth.value)
+    previewData.value = res.data || []
+    batchBonuses.value = previewData.value.map(() => 0)
+    previewLoaded.value = true
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Hisoblashda xatolik')
+  } finally {
+    previewLoading.value = false
+  }
+}
+
+function confirmBatch() {
+  showConfirm.value = true
+}
+
+async function executeBatch() {
+  batchSaving.value = true
+  try {
+    const payments = previewData.value.map((item, idx) => {
+      const bonus = Number(batchBonuses.value[idx]) || 0
+      return {
+        employee_id: item.employee_id,
+        base_salary: Number(item.base_salary),
+        bonus: bonus,
+        deduction: Number(item.deduction),
+        total_amount: computedTotal(item, idx),
+        notes: `${batchMonth.value} oyi ish haqi`,
+      }
+    })
+
+    const res = await hrApi.batchSalaryPayment({
+      month: batchMonth.value,
+      payments,
+    })
+
+    const result = res.data
+    if (result.success_count > 0) {
+      toast.success(`${result.success_count} xodimga ish haqi to'landi!`)
+    }
+    if (result.failed_count > 0) {
+      toast.error(`${result.failed_count} ta xatolik: ${result.errors.join(', ')}`)
+    }
+
+    showConfirm.value = false
+    showBatchModal.value = false
+    load()
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
+  } finally {
+    batchSaving.value = false
+  }
 }
 
 async function save() {

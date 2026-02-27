@@ -1,12 +1,14 @@
 <template>
-  <Suspense>
-    <component :is="dashboardComponent" />
-    <template #fallback>
-      <div class="flex items-center justify-center h-64">
-        <AppSpinner size="lg" />
-      </div>
-    </template>
-  </Suspense>
+  <div>
+    <Suspense>
+      <component :is="dashboardComponent" />
+      <template #fallback>
+        <div class="flex items-center justify-center h-64">
+          <AppSpinner size="lg" />
+        </div>
+      </template>
+    </Suspense>
+  </div>
 </template>
 
 <script setup>
@@ -26,6 +28,7 @@ const roleComponentMap = {
   sales_manager:     () => import('./SalesDashboard.vue'),
   hr_manager:        () => import('./HRDashboard.vue'),
   maintenance:       () => import('./MaintenanceDashboard.vue'),
+  production_manager: () => import('./ProductionDashboard.vue'),
 }
 
 const dashboardComponent = computed(() => {

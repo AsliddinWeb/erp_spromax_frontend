@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-4">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Xodimlar</h3>
       <AppButton @click="openCreate" :icon="Plus">Qo'shish</AppButton>
     </div>
 
     <!-- Filters -->
-    <div class="flex gap-3 flex-wrap">
+    <div class="flex flex-col sm:flex-row gap-3">
       <AppInput
         v-model="search"
         placeholder="Ism yoki telefon bo'yicha qidirish..."

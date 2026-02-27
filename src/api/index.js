@@ -5,6 +5,7 @@ export const authApi = {
   login: (data) => api.post('/auth/login', data),
   refresh: (refresh_token) => api.post('/auth/refresh', { refresh_token }),
   me: () => api.get('/auth/me'),
+  updateProfile: (data) => api.put('/auth/me', data),
   changePassword: (data) => api.put('/auth/change-password', data),
   logout: () => api.post('/auth/logout'),
 }
@@ -157,8 +158,10 @@ export const hrApi = {
   updateAttendance:  (id, data) => api.put(`/hr/attendances/${id}`, data),
 
   // Ish haqi
-  getSalaryPayments:  (params) => api.get('/hr/salary-payments', { params }),
-  createSalaryPayment: (data)  => api.post('/hr/salary-payments', data),
+  getSalaryPayments:    (params) => api.get('/hr/salary-payments', { params }),
+  createSalaryPayment:  (data)   => api.post('/hr/salary-payments', data),
+  calculateSalaryPreview: (month) => api.get('/hr/salary-payments/calculate-preview', { params: { month } }),
+  batchSalaryPayment:   (data)   => api.post('/hr/salary-payments/batch', data),
 
   // Ta'til so'rovlari
   getLeaveRequests:    (params) => api.get('/hr/leave-requests', { params }),
@@ -215,3 +218,10 @@ export const analyticsApi = {
   getAlerts:      ()       => api.get('/analytics/quick-stats/alerts'),
 }
 
+// ─── NOTIFICATIONS ────────────────────────────────────
+export const notificationsApi = {
+  getAll:        (params) => api.get('/notifications', { params }),
+  getUnreadCount: ()      => api.get('/notifications/unread-count'),
+  markRead:      (id)     => api.put(`/notifications/${id}/read`),
+  markAllRead:   ()       => api.put('/notifications/read-all'),
+}
