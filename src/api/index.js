@@ -255,6 +255,11 @@ export const settingsApi = {
   updateSetting:    (key, data) => api.put(`/settings/${key}`, data),
 }
 
+// ─── AUDIT LOGS ───────────────────────────────────────
+export const auditApi = {
+  getLogs: (params) => api.get('/audit-logs', { params }),
+}
+
 // ─── NOTIFICATIONS ────────────────────────────────────
 export const notificationsApi = {
   getAll:        (params) => api.get('/notifications', { params }),

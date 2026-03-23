@@ -46,6 +46,7 @@ const routes = [
       { path: 'analytics',   name: 'Analytics',   component: () => import('@/views/analytics/AnalyticsView.vue') },
       { path: 'profile',          name: 'Profile',         component: () => import('@/views/profile/ProfileView.vue') },
       { path: 'system-settings', name: 'SystemSettings',  component: () => import('@/views/settings/SystemSettingsView.vue') },
+      { path: 'audit-logs',      name: 'AuditLogs',       component: () => import('@/views/settings/AuditLogView.vue') },
     ]
   },
   { path: '/:pathMatch(.*)*', redirect: '/404' }

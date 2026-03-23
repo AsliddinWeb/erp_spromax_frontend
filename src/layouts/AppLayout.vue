@@ -185,6 +185,22 @@
                   <KeyRound class="w-4 h-4 text-gray-400" />
                   Parol o'zgartirish
                 </button>
+                <!-- UI Scale -->
+                <div class="px-4 py-2 border-t border-gray-50 dark:border-dark-border">
+                  <p class="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">Interfeys o'lchami</p>
+                  <div class="flex gap-1">
+                    <button
+                      v-for="opt in scaleOptions" :key="opt.value"
+                      @click="themeStore.setScale(opt.value)"
+                      :class="[
+                        'flex-1 py-1 rounded text-xs font-medium transition-colors',
+                        themeStore.uiScale === opt.value
+                          ? 'bg-primary text-white'
+                          : 'bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-600'
+                      ]"
+                    >{{ opt.label }}</button>
+                  </div>
+                </div>
                 <div class="h-px bg-gray-50 dark:bg-dark-border mx-2 my-1" />
                 <button @click="logout" class="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-danger hover:bg-danger/5 transition-colors">
                   <LogOut class="w-4 h-4" />
@@ -224,9 +240,10 @@ import {
   LayoutDashboard, Package, Factory, ShoppingCart,
   Wallet, Users, Wrench, UserCog, BarChart2, Settings2,
   Menu, Sun, Moon, ChevronDown, ChevronLeft, LogOut, KeyRound, UserCircle,
-  Maximize2, Minimize2
+  Maximize2, Minimize2, ClipboardList
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 import { useToast } from '@/composables/useToast'
 import { usePermission } from '@/composables/usePermission'
 import { useNotificationsStore } from '@/stores/notifications'
@@ -237,7 +254,15 @@ import AppInput from '@/components/ui/AppInput.vue'
 import NotificationPanel from '@/components/shared/NotificationPanel.vue'
 
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 const toast = useToast()
+
+const scaleOptions = [
+  { value: 'normal',  label: '100%' },
+  { value: 'large',   label: '110%' },
+  { value: 'xlarge',  label: '120%' },
+  { value: 'xxlarge', label: '130%' },
+]
 const { hasRole } = usePermission()
 const route = useRoute()
 const router = useRouter()
@@ -284,7 +309,8 @@ const navGroups = [
       { to: '/maintenance', label: 'Texnik xizmat',    icon: Wrench,       roles: ['superadmin','admin','director','maintenance','production_manager','operator'] },
       { to: '/users',           label: 'Foydalanuvchilar', icon: UserCog,      roles: ['superadmin','admin'] },
       { to: '/analytics',       label: 'Tahlil',           icon: BarChart2,    roles: ['superadmin','admin','director'] },
-      { to: '/system-settings', label: 'Tizim Sozlamalari', icon: Settings2,   roles: ['superadmin'] },
+      { to: '/system-settings', label: 'Tizim Sozlamalari', icon: Settings2,    roles: ['superadmin'] },
+      { to: '/audit-logs',      label: 'Tizim Loglari',    icon: ClipboardList, roles: ['superadmin', 'admin'] },
     ]
   }
 ]
