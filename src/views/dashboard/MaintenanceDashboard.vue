@@ -149,7 +149,7 @@ import {
 import { maintenanceApi } from '@/api'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
-import StatCard from '@/components/shared/StatCard.vue'
+import StatCard from '@/components/ui/StatCard.vue'
 
 const authStore = useAuthStore()
 const toast = useToast()

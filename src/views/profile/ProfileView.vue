@@ -168,7 +168,7 @@ import { authApi, analyticsApi, warehouseApi, salesApi, financeApi, hrApi, maint
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
 import AppModal from '@/components/ui/AppModal.vue'
-import StatCard from '@/views/analytics/StatCard.vue'
+import StatCard from '@/components/ui/StatCard.vue'
 
 const authStore = useAuthStore()
 const toast = useToast()

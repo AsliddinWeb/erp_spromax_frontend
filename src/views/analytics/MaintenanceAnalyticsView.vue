@@ -80,7 +80,7 @@ import { analyticsApi } from '@/api'
 import { useToast } from '@/composables/useToast'
 import { useAnalyticsFilter } from '@/composables/useAnalyticsFilter'
 import AnalyticsFilter from './AnalyticsFilter.vue'
-import StatCard from './StatCard.vue'
+import StatCard from '@/components/ui/StatCard.vue'
 
 const toast = useToast()
 const { activePreset, customStart, customEnd, presets, apiParams } = useAnalyticsFilter()

@@ -57,7 +57,7 @@ import { ref, onMounted } from 'vue'
 import { Users, UserCheck, Umbrella, CalendarCheck, Wallet, CreditCard } from 'lucide-vue-next'
 import { analyticsApi } from '@/api'
 import { useToast } from '@/composables/useToast'
-import StatCard from './StatCard.vue'
+import StatCard from '@/components/ui/StatCard.vue'
 import AppTable from '@/components/ui/AppTable.vue'
 
 const toast = useToast()

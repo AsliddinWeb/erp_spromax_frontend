@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Foydalanuvchilar</h2>
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -18,7 +18,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="flex gap-3 flex-wrap">
+    <div class="flex flex-col sm:flex-row gap-3">
       <AppInput
         v-model="search"
         placeholder="Ism, username yoki email bo'yicha..."
@@ -289,6 +289,7 @@
 </template>
 
 <script setup>
+import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted } from 'vue'
 import { Search, Plus, Edit, Trash2, AlertTriangle } from 'lucide-vue-next'
 import { usersApi } from '@/api'
@@ -387,12 +388,7 @@ function initials(user) {
   return name[0].toUpperCase()
 }
 
-function formatDate(dt) {
-  if (!dt) return '—'
-  return new Date(dt).toLocaleDateString('uz-UZ', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-  })
-}
+
 
 // Load
 async function load() {

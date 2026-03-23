@@ -164,6 +164,7 @@
 </template>
 
 <script setup>
+import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted } from 'vue'
 import { Search, Plus, Edit, Eye, EyeOff } from 'lucide-vue-next'
 import { hrApi } from '@/api'
@@ -198,7 +199,7 @@ const defaultForm = () => ({
   first_name: '', last_name: '', phone: '', email: '',
   address: '', passport_serial: '', inn: '',
   department_id: '', position: '',
-  hire_date: new Date().toISOString().slice(0, 10),
+  hire_date: todayISO(),
   salary: '', employment_status: 'active', user_id: null,
 })
 const form = ref(defaultForm())
@@ -260,10 +261,6 @@ function formatMoney(val) {
   const num = Number(val || 0)
   if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + ' mln'
   return num.toLocaleString('uz-UZ') + ' so\'m'
-}
-function formatDate(dt) {
-  if (!dt) return '—'
-  return new Date(dt).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 async function load() {

@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-4">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ta'til so'rovlari</h3>
       <AppButton @click="openCreate" :icon="Plus">So'rov yuborish</AppButton>
     </div>
 
     <!-- Filters -->
-    <div class="flex gap-3 flex-wrap">
+    <div class="flex flex-col sm:flex-row gap-3">
       <AppSelect v-model="employeeFilter" :options="employeeOptions" placeholder="Xodim" class="w-56" />
       <AppSelect v-model="statusFilter" :options="statusOptions" placeholder="Holat" class="w-44" />
       <AppSelect v-model="typeFilter" :options="leaveTypeOptions" placeholder="Ta'til turi" class="w-44" />
@@ -64,18 +64,10 @@
       <form @submit.prevent="save" class="space-y-4">
         <AppSelect v-model="form.employee_id" label="Xodim" required :options="employeeSelectOptions" :error="errors.employee_id" />
         <div class="grid grid-cols-2 gap-4">
-          <AppSelect
-            v-model="form.leave_type"
-            label="Ta'til turi"
-            required
-            :options="leaveTypeOptions.filter(o => o.value)"
-            :error="errors.leave_type"
-          />
-          <AppSelect
-            v-model="form.is_paid"
-            label="To'lov turi"
-            :options="isPaidOptions"
-          />
+          <AppSelect v-model="form.leave_type" label="Ta'til turi" required
+            :options="leaveTypeOptions.filter(o => o.value)" :error="errors.leave_type" />
+          <AppSelect v-model="form.is_paid" label="To'lov turi" required
+            :options="isPaidOptions" />
         </div>
         <div class="grid grid-cols-2 gap-4">
           <AppInput v-model="form.start_date" label="Boshlanish sanasi" type="date" required :error="errors.start_date" />
@@ -83,21 +75,13 @@
         </div>
 
         <!-- Preview -->
-        <div
-          v-if="daysPreview > 0"
-          class="p-3 rounded-lg border text-sm"
-          :class="form.is_paid === '1'
-            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-            : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'"
-        >
-          <div class="flex items-center justify-between">
-            <span
-              class="font-semibold"
-              :class="form.is_paid === '1' ? 'text-green-700 dark:text-green-300' : 'text-orange-700 dark:text-orange-300'"
-            >
+        <div v-if="daysPreview > 0" class="p-3 rounded-lg border text-sm"
+          :class="form.is_paid === '1' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <span class="font-semibold" :class="form.is_paid === '1' ? 'text-green-700 dark:text-green-300' : 'text-orange-700 dark:text-orange-300'">
               {{ daysPreview }} kun {{ form.is_paid === '1' ? "pullik ta'til" : "pulsiz ta'til" }}
             </span>
-            <span v-if="form.is_paid === '0' && selectedEmployeeSalary" class="text-danger font-medium">
+            <span v-if="form.is_paid !== '1' && selectedEmployeeSalary" class="text-danger font-medium">
               Oylikdan -{{ formatMoney(daysPreview * (selectedEmployeeSalary / 26)) }} chegirma
             </span>
           </div>
@@ -105,12 +89,8 @@
 
         <div class="space-y-1">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sabab</label>
-          <textarea
-            v-model="form.reason"
-            rows="3"
-            placeholder="Ta'til sababi..."
-            class="w-full rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-          />
+          <textarea v-model="form.reason" rows="3" placeholder="Ta'til sababi..."
+            class="w-full rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors" />
         </div>
       </form>
       <template #footer>
@@ -123,12 +103,8 @@
     <AppModal v-model="showRejectModal" title="So'rovni rad etish" size="sm">
       <div class="space-y-3">
         <p class="text-sm text-gray-600 dark:text-gray-400">Rad etish sababini kiriting:</p>
-        <textarea
-          v-model="rejectReason"
-          rows="3"
-          placeholder="Sabab..."
-          class="w-full rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-        />
+        <textarea v-model="rejectReason" rows="3" placeholder="Sabab..."
+          class="w-full rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors" />
       </div>
       <template #footer>
         <AppButton variant="secondary" @click="showRejectModal = false">Bekor qilish</AppButton>
@@ -208,7 +184,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
+import { ref, computed, onMounted, watch } from 'vue'
 import { Plus, Check, X } from 'lucide-vue-next'
 import { hrApi } from '@/api'
 import { usePermission } from '@/composables/usePermission'
@@ -242,12 +219,6 @@ const page = ref(1)
 const limit = ref(20)
 const total = ref(0)
 const errors = ref({})
-
-// '0' = pulsiz, '1' = pullik (AppSelect faqat string qabul qiladi)
-const isPaidOptions = [
-  { value: '0', label: "Pulsiz ta'til" },
-  { value: '1', label: "Pullik ta'til" },
-]
 
 const defaultForm = () => ({
   employee_id: '',
@@ -296,11 +267,11 @@ const employeeOptions = computed(() => [
   { value: '', label: 'Barcha xodimlar' },
   ...employeesData.value.map(e => ({ value: e.id, label: `${e.first_name} ${e.last_name}` }))
 ])
-
 const employeeSelectOptions = computed(() =>
   employeesData.value.map(e => ({ value: e.id, label: `${e.first_name} ${e.last_name}` }))
 )
 
+// Tanlangan xodim oyligini topish (preview uchun)
 const selectedEmployeeSalary = computed(() => {
   if (!form.value.employee_id) return 0
   const emp = employeesData.value.find(e => e.id === form.value.employee_id)
@@ -334,10 +305,6 @@ function statusLabel(s) {
 function leaveTypeLabel(t) {
   const map = { annual: "Yillik ta'til", sick: 'Kasallik', unpaid: "Haqsiz ta'til", maternity: "Tug'ruq ta'tili", other: 'Boshqa' }
   return map[t] || t
-}
-function formatDate(dt) {
-  if (!dt) return '—'
-  return new Date(dt).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 function formatMoney(val) {
   const num = Number(val || 0)

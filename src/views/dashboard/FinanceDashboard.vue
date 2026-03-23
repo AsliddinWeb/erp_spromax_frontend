@@ -152,7 +152,7 @@ import { RefreshCw, ChevronRight, Banknote, TrendingUp, DollarSign, BarChart3, P
 import { financeApi } from '@/api'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
-import StatCard from '@/components/shared/StatCard.vue'
+import StatCard from '@/components/ui/StatCard.vue'
 
 const authStore = useAuthStore()
 const toast = useToast()

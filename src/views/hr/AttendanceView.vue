@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-4">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Davomat</h3>
       <AppButton @click="openCreate" :icon="Plus">Davomat qo'shish</AppButton>
     </div>
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="flex gap-3 flex-wrap">
+    <div class="flex flex-col sm:flex-row gap-3">
       <AppSelect v-model="employeeFilter" :options="employeeOptions" placeholder="Xodim" class="w-56" />
       <AppSelect v-model="statusFilter" :options="attendanceStatusOptions" placeholder="Holat" class="w-44" />
       <AppInput v-model="dateFrom" type="date" class="w-40" />
@@ -155,6 +155,7 @@
 </template>
 
 <script setup>
+import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted } from 'vue'
 import { Plus, Edit, CalendarCheck } from 'lucide-vue-next'
 import { hrApi } from '@/api'
@@ -189,7 +190,7 @@ const errors = ref({})
 
 const defaultForm = () => ({
   employee_id: '',
-  attendance_date: new Date().toISOString().slice(0, 10),
+  attendance_date: todayISO(),
   status: 'present',
   check_in_time: '',
   check_out_time: '',
@@ -246,10 +247,6 @@ function attendanceVariant(s) {
 function attendanceLabel(s) {
   const map = { present: 'Kelgan', absent: 'Kelmagan', late: 'Kechikkan', half_day: 'Yarim kun' }
   return map[s] || s
-}
-function formatDate(dt) {
-  if (!dt) return '—'
-  return new Date(dt).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 async function load() {
@@ -324,7 +321,7 @@ async function saveEdit() {
   saving.value = true
   try {
     const row = data.value.find(r => r.id === editingId.value)
-    const date = row?.attendance_date || new Date().toISOString().slice(0, 10)
+    const date = row?.attendance_date || todayISO()
     await hrApi.updateAttendance(editingId.value, {
       status: editForm.value.status || null,
       check_in_time: editForm.value.check_in_time ? `${date}T${editForm.value.check_in_time}:00` : null,

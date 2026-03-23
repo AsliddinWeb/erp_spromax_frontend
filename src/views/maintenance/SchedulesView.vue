@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Texnik xizmat jadvali</h3>
       <AppButton
         v-if="hasRole(['superadmin','admin','director','maintenance'])"
@@ -36,7 +36,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="flex gap-3 flex-wrap">
+    <div class="flex flex-col sm:flex-row gap-3">
       <AppInput
         v-model="search"
         placeholder="Mashina nomi bo'yicha qidirish..."
@@ -192,6 +192,7 @@
 </template>
 
 <script setup>
+import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted } from 'vue'
 import { Search, Plus, Edit, Eye, EyeOff, Bell } from 'lucide-vue-next'
 import { maintenanceApi, productionApi } from '@/api'
@@ -285,10 +286,6 @@ function scheduleTypeLabel(t) {
     lubrication: 'Moylaш', calibration: 'Kalibrlash', cleaning: 'Tozalash'
   }
   return map[t] || t
-}
-function formatDate(dt) {
-  if (!dt) return '—'
-  return new Date(dt).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 function isOverdue(dt) {
   if (!dt) return false

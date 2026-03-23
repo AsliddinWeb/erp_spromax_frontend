@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Tranzaksiyalar</h3>
       <AppButton @click="openCreate" :icon="Plus">Qo'shish</AppButton>
     </div>
@@ -29,7 +29,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="flex gap-3 flex-wrap">
+    <div class="flex flex-col sm:flex-row gap-3">
       <AppInput
         v-model="search"
         placeholder="Tavsif bo'yicha qidirish..."
@@ -170,6 +170,7 @@
 </template>
 
 <script setup>
+import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted, watch } from 'vue'
 import { Search, Plus, Edit, Eye, EyeOff } from 'lucide-vue-next'
 import { financeApi } from '@/api'
@@ -208,7 +209,7 @@ const errors = ref({})
 
 const defaultForm = () => ({
   transaction_type: 'income',
-  transaction_date: new Date().toISOString().slice(0, 16),
+  transaction_date: nowLocalISO(),
   amount: '',
   category_id: '',
   description: '',
@@ -298,10 +299,6 @@ function formatMoney(val) {
   return num.toLocaleString('uz-UZ') + " so'm"
 }
 
-function formatDate(dt) {
-  if (!dt) return '—'
-  return new Date(dt).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
 
 async function load() {
   loading.value = true

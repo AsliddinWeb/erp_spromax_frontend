@@ -184,6 +184,7 @@
 </template>
 
 <script setup>
+import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted } from 'vue'
 import { Search, Plus, AlertTriangle } from 'lucide-vue-next'
 import { warehouseApi } from '@/api'
@@ -222,7 +223,7 @@ const defaultReceiptForm = () => ({
   raw_material_id: '',
   quantity: '',
   unit_price: '',
-  receipt_date: new Date().toISOString().slice(0, 16),
+  receipt_date: nowLocalISO(),
   notes: '',
 })
 const receiptForm = ref(defaultReceiptForm())
@@ -290,10 +291,6 @@ function getStockBarClass(row) {
   return 'bg-success'
 }
 
-function formatDate(dt) {
-  if (!dt) return '-'
-  return new Date(dt).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
 
 function formatMoney(val) {
   return Number(val || 0).toLocaleString('uz-UZ')

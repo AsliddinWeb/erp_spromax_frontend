@@ -240,6 +240,7 @@
 </template>
 
 <script setup>
+import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref } from 'vue'
 import { RefreshCw, BarChart2 } from 'lucide-vue-next'
 import { financeApi } from '@/api'
@@ -261,23 +262,23 @@ const reportTabs = [
 const plReport = ref(null)
 const plLoading = ref(false)
 const plFilter = ref({
-  start_date: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10),
-  end_date: new Date().toISOString().slice(0, 10),
+  start_date: startOfMonthISO(),
+  end_date: todayISO(),
 })
 
 // Cash Flow
 const cfReport = ref(null)
 const cfLoading = ref(false)
 const cfFilter = ref({
-  start_date: new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10),
-  end_date: new Date().toISOString().slice(0, 10),
+  start_date: startOfYearISO(),
+  end_date: todayISO(),
 })
 
 // Balance
 const balReport = ref(null)
 const balLoading = ref(false)
 const balanceFilter = ref({
-  report_date: new Date().toISOString().slice(0, 10),
+  report_date: todayISO(),
 })
 
 function formatMoney(val) {
@@ -287,10 +288,6 @@ function formatMoney(val) {
   return num.toLocaleString('uz-UZ') + ' so\'m'
 }
 
-function formatDate(dt) {
-  if (!dt) return '—'
-  return new Date(dt).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
 
 async function loadPL() {
   if (!plFilter.value.start_date || !plFilter.value.end_date) {

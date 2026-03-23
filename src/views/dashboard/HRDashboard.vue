@@ -135,7 +135,7 @@ import { RefreshCw, ChevronRight, Users, UserCheck, Banknote, BarChart3, Plus, C
 import { hrApi } from '@/api'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
-import StatCard from '@/components/shared/StatCard.vue'
+import StatCard from '@/components/ui/StatCard.vue'
 
 const authStore = useAuthStore()
 const toast = useToast()

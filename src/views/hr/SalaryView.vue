@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-4">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ish haqi to'lovlari</h3>
       <div class="flex gap-2">
         <AppButton variant="primary" :icon="Calculator" @click="openBatchModal">Oylik hisoblash va to'lash</AppButton>
@@ -9,7 +9,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="flex gap-3 flex-wrap">
+    <div class="flex flex-col sm:flex-row gap-3">
       <AppSelect v-model="employeeFilter" :options="employeeOptions" placeholder="Xodim" class="w-56" />
       <AppSelect v-model="methodFilter" :options="methodOptions" placeholder="To'lov usuli" class="w-44" />
       <AppInput v-model="dateFrom" type="date" class="w-40" />
@@ -251,6 +251,7 @@
 </template>
 
 <script setup>
+import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted } from 'vue'
 import { Plus, Calculator, Search, CheckCircle } from 'lucide-vue-next'
 import { hrApi } from '@/api'
@@ -284,7 +285,7 @@ const total = ref(0)
 const errors = ref({})
 
 // Batch
-const batchMonth = ref(new Date().toISOString().slice(0, 7))
+const batchMonth = ref(new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tashkent' }).slice(0, 7))
 const previewData = ref([])
 const batchBonuses = ref([])
 const previewLoading = ref(false)
@@ -294,12 +295,12 @@ const batchSaving = ref(false)
 const now = new Date()
 const defaultForm = () => ({
   employee_id: '',
-  period_start: new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10),
-  period_end: new Date().toISOString().slice(0, 10),
+  period_start: startOfMonthISO(),
+  period_end: todayISO(),
   base_salary: '',
   bonus: '0',
   deductions: '0',
-  payment_date: new Date().toISOString().slice(0, 10),
+  payment_date: todayISO(),
   payment_method: 'bank_transfer',
   notes: '',
 })
@@ -368,10 +369,6 @@ function formatMoney(val) {
   if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + ' mln'
   return num.toLocaleString('uz-UZ') + ' so\'m'
 }
-function formatDate(dt) {
-  if (!dt) return '—'
-  return new Date(dt).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
 
 async function load() {
   loading.value = true
@@ -405,7 +402,7 @@ function openBatchModal() {
   previewData.value = []
   batchBonuses.value = []
   previewLoaded.value = false
-  batchMonth.value = new Date().toISOString().slice(0, 7)
+  batchMonth.value = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tashkent' }).slice(0, 7)
   showBatchModal.value = true
 }
 

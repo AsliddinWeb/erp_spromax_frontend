@@ -69,7 +69,7 @@ import { ref, onMounted } from 'vue'
 import { Package, AlertTriangle, Wallet, Box, Wrench } from 'lucide-vue-next'
 import { analyticsApi } from '@/api'
 import { useToast } from '@/composables/useToast'
-import StatCard from './StatCard.vue'
+import StatCard from '@/components/ui/StatCard.vue'
 
 const toast = useToast()
 const data = ref(null)

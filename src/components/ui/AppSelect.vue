@@ -25,6 +25,7 @@
           v-for="opt in options"
           :key="opt.value"
           :value="opt.value"
+          :disabled="opt.disabled"
         >
           {{ opt.label }}
         </option>

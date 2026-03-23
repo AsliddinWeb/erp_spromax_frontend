@@ -67,6 +67,7 @@ export const productionApi = {
   deleteMachine: (id) => api.delete(`/production/machines/${id}`),
 
   getFinishedProducts: (params) => api.get('/production/finished-products', { params }),
+  getFinishedStock: () => api.get('/production/finished-stock'),
   getFinishedProduct: (id) => api.get(`/production/finished-products/${id}`),
   createFinishedProduct: (data) => api.post('/production/finished-products', data),
   updateFinishedProduct: (id, data) => api.put(`/production/finished-products/${id}`, data),
@@ -90,6 +91,23 @@ export const productionApi = {
   createDefectReason: (data) => api.post('/production/defect-reasons', data),
 
   getStatistics: () => api.get('/production/statistics'),
+
+  // Pause
+  pauseShift: (id, data) => api.post(`/production/shifts/${id}/pause`, data),
+  resumeShift: (id) => api.post(`/production/shifts/${id}/resume`),
+  getShiftPauses: (id) => api.get(`/production/shifts/${id}/pauses`),
+
+  // Scrap usage
+  useScrapInShift: (id, data) => api.post(`/production/shifts/${id}/scrap-usage`, data),
+  getShiftScrapUsage: (id) => api.get(`/production/shifts/${id}/scrap-usage`),
+
+  // Close shift (output + scrap birga)
+  closeShift: (id, data) => api.post(`/production/shifts/${id}/close`, data),
+
+  // Scrap stock
+  getScrapStock: () => api.get('/production/scrap-stock'),
+  getScrapTransactions: (params) => api.get('/production/scrap-stock/transactions', { params }),
+  transferScrapToGrinder: (data) => api.post('/production/scrap-stock/transfer-to-grinder', data),
 }
 
 // ─── SALES ────────────────────────────────────────────
@@ -108,6 +126,7 @@ export const salesApi = {
   updateOrder: (id, data) => api.put(`/sales/orders/${id}`, data),
   deleteOrder: (id) => api.delete(`/sales/orders/${id}`),
   getOrderPayments: (id) => api.get(`/sales/orders/${id}/payments`),
+  getAllPayments: (params) => api.get('/sales/payments', { params }),
 
   createPayment: (data) => api.post('/sales/payments', data),
 

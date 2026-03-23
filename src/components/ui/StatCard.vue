@@ -22,13 +22,14 @@
 <script setup>
 import { computed } from 'vue'
 
+// icon type intentionally omitted — accepts Object, Function, or String (component name)
 const props = defineProps({
   label: String,
   value: [String, Number],
-  unit: String,
-  sub: String,
-  color: { type: String, default: 'primary' },
-  icon: { type: [Object, Function], default: null },
+  unit:  String,
+  sub:   String,
+  color: { default: 'primary' },
+  icon:  { default: null },
 })
 
 const colorMap = {
@@ -42,6 +43,6 @@ const colorMap = {
 
 const c = computed(() => colorMap[props.color] || colorMap.default)
 const valueClass = computed(() => c.value.value)
-const iconBg = computed(() => c.value.bg)
-const iconColor = computed(() => c.value.icon)
+const iconBg     = computed(() => c.value.bg)
+const iconColor  = computed(() => c.value.icon)
 </script>
