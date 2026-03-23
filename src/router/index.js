@@ -5,13 +5,13 @@ const roleRoutes = {
   superadmin:         ['*'],
   admin:              ['*'],
   director:           ['*'],
-  hr_manager:         ['dashboard', 'hr', 'analytics', 'profile'],
-  accountant:         ['dashboard', 'finance', 'analytics', 'profile'],
-  warehouse_manager:  ['dashboard', 'warehouse', 'analytics', 'profile'],
-  production_manager: ['dashboard', 'production', 'maintenance', 'analytics', 'profile'],
-  sales_manager:      ['dashboard', 'sales', 'analytics', 'profile'],
-  operator:           ['dashboard', 'production', 'maintenance', 'profile'],
-  maintenance:        ['dashboard', 'maintenance', 'profile'],
+  hr_manager:         ['dashboard', 'hr', 'analytics', 'profile', 'notifications'],
+  accountant:         ['dashboard', 'finance', 'analytics', 'profile', 'notifications'],
+  warehouse_manager:  ['dashboard', 'warehouse', 'analytics', 'profile', 'notifications'],
+  production_manager: ['dashboard', 'production', 'maintenance', 'analytics', 'profile', 'notifications'],
+  sales_manager:      ['dashboard', 'sales', 'analytics', 'profile', 'notifications'],
+  operator:           ['dashboard', 'production', 'maintenance', 'profile', 'notifications'],
+  maintenance:        ['dashboard', 'maintenance', 'profile', 'notifications'],
 }
 
 function canAccess(roleName, routeName) {
@@ -45,6 +45,7 @@ const routes = [
       { path: 'users',       name: 'Users',       component: () => import('@/views/users/UsersView.vue') },
       { path: 'analytics',   name: 'Analytics',   component: () => import('@/views/analytics/AnalyticsView.vue') },
       { path: 'profile',          name: 'Profile',         component: () => import('@/views/profile/ProfileView.vue') },
+      { path: 'notifications',   name: 'Notifications',   component: () => import('@/views/notifications/NotificationsView.vue') },
       { path: 'system-settings', name: 'SystemSettings',  component: () => import('@/views/settings/SystemSettingsView.vue') },
       { path: 'audit-logs',      name: 'AuditLogs',       component: () => import('@/views/settings/AuditLogView.vue') },
     ]

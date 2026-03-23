@@ -19,10 +19,10 @@
     <Transition name="dropdown">
       <div
         v-if="open"
-        class="absolute right-0 top-full mt-1.5 w-80 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-border shadow-xl overflow-hidden z-50"
+        class="absolute right-0 top-full mt-1.5 w-80 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-border shadow-xl overflow-hidden z-50 flex flex-col max-h-[26rem]"
       >
         <!-- Header -->
-        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-dark-border">
+        <div class="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-dark-border">
           <div class="flex items-center gap-2">
             <span class="text-sm font-semibold text-gray-900 dark:text-white">Bildirishnomalar</span>
             <span
@@ -42,7 +42,7 @@
         </div>
 
         <!-- List -->
-        <div class="max-h-96 overflow-y-auto">
+        <div class="flex-1 overflow-y-auto min-h-0">
           <div v-if="store.loading" class="py-8 text-center text-gray-400 text-sm">
             Yuklanmoqda...
           </div>
@@ -54,7 +54,7 @@
 
           <div v-else>
             <button
-              v-for="notif in store.notifications"
+              v-for="notif in store.notifications.slice(0, 5)"
               :key="notif.id"
               @click="handleClick(notif)"
               class="w-full flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-dark-700/50 transition-colors text-left border-b border-gray-50 dark:border-dark-border/50 last:border-0"
@@ -87,6 +87,19 @@
             </button>
           </div>
         </div>
+        <!-- Footer -->
+        <div class="flex-shrink-0 border-t border-gray-100 dark:border-dark-border px-4 py-2.5">
+          <RouterLink
+            to="/notifications"
+            @click="open = false"
+            class="block text-center text-xs text-primary hover:underline font-medium"
+          >
+            Barcha bildirishnomalarni ko'rish
+            <span v-if="store.notifications.length > 5" class="text-gray-400 font-normal">
+              ({{ store.notifications.length - 5 }} ta yana)
+            </span>
+          </RouterLink>
+        </div>
       </div>
     </Transition>
   </div>
@@ -94,7 +107,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 import { Bell, BellOff, PackageX, Wrench, ShoppingCart, Users, Wallet, Settings } from 'lucide-vue-next'
 import { useNotificationsStore } from '@/stores/notifications'
 
@@ -163,7 +176,7 @@ function timeAgo(dateStr) {
 async function toggle() {
   open.value = !open.value
   if (open.value) {
-    await store.fetchNotifications()
+    await store.fetchNotifications({ limit: 20 })
   }
 }
 

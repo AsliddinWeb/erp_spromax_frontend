@@ -240,7 +240,7 @@ import {
   LayoutDashboard, Package, Factory, ShoppingCart,
   Wallet, Users, Wrench, UserCog, BarChart2, Settings2,
   Menu, Sun, Moon, ChevronDown, ChevronLeft, LogOut, KeyRound, UserCircle,
-  Maximize2, Minimize2, ClipboardList
+  Maximize2, Minimize2, ClipboardList, Bell
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
@@ -310,6 +310,7 @@ const navGroups = [
       { to: '/users',           label: 'Foydalanuvchilar', icon: UserCog,      roles: ['superadmin','admin'] },
       { to: '/analytics',       label: 'Tahlil',           icon: BarChart2,    roles: ['superadmin','admin','director'] },
       { to: '/system-settings', label: 'Tizim Sozlamalari', icon: Settings2,    roles: ['superadmin'] },
+      { to: '/notifications',   label: 'Bildirishnomalar', icon: Bell,          roles: null },
       { to: '/audit-logs',      label: 'Tizim Loglari',    icon: ClipboardList, roles: ['superadmin', 'admin'] },
     ]
   }
@@ -325,6 +326,7 @@ const pageTitle = computed(() => {
     '/sales': 'Sotuv', '/finance': 'Moliya', '/hr': 'Kadrlar bo\'limi',
     '/maintenance': 'Texnik xizmat', '/users': 'Foydalanuvchilar', '/analytics': 'Tahlil',
     '/system-settings': 'Tizim Sozlamalari',
+    '/notifications': 'Bildirishnomalar',
     '/profile': 'Profil',
   }
   return map[route.path] || 'ERP Tizimi'
@@ -406,11 +408,12 @@ function handleClickOutside(e) {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('fullscreenchange', onFullscreenChange)
-  notifStore.startPolling()
+  notifStore.startWS()
 })
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('fullscreenchange', onFullscreenChange)
+  notifStore.stopWS()
 })
 </script>
 

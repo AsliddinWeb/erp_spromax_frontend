@@ -134,9 +134,9 @@ const filteredData = computed(() => {
     )
   }
   if (methodFilter.value) result = result.filter(i => i.method === methodFilter.value)
-  if (statusFilter.value === '2xx') result = result.filter(i => i.status_code >= 200 && i.status_code < 300)
-  if (statusFilter.value === '4xx') result = result.filter(i => i.status_code >= 400 && i.status_code < 500)
-  if (statusFilter.value === '5xx') result = result.filter(i => i.status_code >= 500)
+  if (statusFilter.value === '2xx') result = result.filter(i => Number(i.status_code) >= 200 && Number(i.status_code) < 300)
+  if (statusFilter.value === '4xx') result = result.filter(i => Number(i.status_code) >= 400 && Number(i.status_code) < 500)
+  if (statusFilter.value === '5xx') result = result.filter(i => Number(i.status_code) >= 500)
   if (dateFrom.value) result = result.filter(i => new Date(i.created_at) >= new Date(dateFrom.value))
   if (dateTo.value) result = result.filter(i => new Date(i.created_at) <= new Date(dateTo.value + 'T23:59:59'))
 
@@ -157,9 +157,10 @@ function methodVariant(m) {
 }
 
 function statusVariant(code) {
-  if (code >= 200 && code < 300) return 'success'
-  if (code >= 400 && code < 500) return 'warning'
-  if (code >= 500) return 'danger'
+  const n = Number(code)
+  if (n >= 200 && n < 300) return 'success'
+  if (n >= 400 && n < 500) return 'warning'
+  if (n >= 500) return 'danger'
   return 'default'
 }
 

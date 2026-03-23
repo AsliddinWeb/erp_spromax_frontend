@@ -6,41 +6,84 @@ export const useNotificationsStore = defineStore('notifications', () => {
   const notifications = ref([])
   const unreadCount = ref(0)
   const loading = ref(false)
+  const connected = ref(false)
 
-  // Polling singleton — faqat bir marta ishga tushadi
-  let _intervalId = null
+  let _ws = null
+  let _reconnectTimer = null
+  let _pingTimer = null
   let _started = false
 
-  function startPolling() {
-    if (_started) return  // ikkinchi chaqiruvda ignore
+  function startWS() {
+    if (_started) return
     _started = true
-    _poll()
-    _intervalId = setInterval(_poll, 30_000)
-    document.addEventListener('visibilitychange', _handleVisibility)
+    _connect()
   }
 
-  function stopPolling() {
-    if (_intervalId) { clearInterval(_intervalId); _intervalId = null }
+  function stopWS() {
     _started = false
-    document.removeEventListener('visibilitychange', _handleVisibility)
+    clearTimeout(_reconnectTimer)
+    clearInterval(_pingTimer)
+    _reconnectTimer = null
+    _pingTimer = null
+    if (_ws) { _ws.close(); _ws = null }
+    connected.value = false
   }
 
-  async function _poll() {
-    if (document.hidden) return
+  function _connect() {
+    if (!_started) return
+    const token = localStorage.getItem('access_token')
+    if (!token) return
+
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const url = `${protocol}//${window.location.host}/api/v1/notifications/ws?token=${token}`
+
     try {
-      const { data } = await notificationsApi.getUnreadCount()
-      unreadCount.value = data.count || 0
-    } catch { /* silent */ }
+      _ws = new WebSocket(url)
+    } catch {
+      _scheduleReconnect()
+      return
+    }
+
+    _ws.onopen = () => {
+      connected.value = true
+      fetchNotifications({ limit: 20 })
+      // 30 soniyada bir ping — nginx idle timeout dan saqlash
+      _pingTimer = setInterval(() => {
+        if (_ws?.readyState === WebSocket.OPEN) _ws.send('ping')
+      }, 30000)
+    }
+
+    _ws.onmessage = (event) => {
+      if (event.data === 'pong') return
+      try {
+        const notif = JSON.parse(event.data)
+        notifications.value.unshift(notif)
+        unreadCount.value++
+      } catch {}
+    }
+
+    _ws.onclose = () => {
+      connected.value = false
+      clearInterval(_pingTimer)
+      _pingTimer = null
+      _ws = null
+      _scheduleReconnect()
+    }
+
+    _ws.onerror = () => {
+      _ws?.close()
+    }
   }
 
-  function _handleVisibility() {
-    if (!document.hidden) _poll()
+  function _scheduleReconnect() {
+    if (!_started) return
+    _reconnectTimer = setTimeout(_connect, 5000)
   }
 
   async function fetchNotifications(params = {}) {
     loading.value = true
     try {
-      const { data } = await notificationsApi.getAll({ limit: 20, ...params })
+      const { data } = await notificationsApi.getAll({ limit: 50, ...params })
       notifications.value = data.items || []
       unreadCount.value = data.unread_count || 0
     } catch {
@@ -58,7 +101,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
         notif.is_read = true
         unreadCount.value = Math.max(0, unreadCount.value - 1)
       }
-    } catch { /* silent */ }
+    } catch {}
   }
 
   async function markAllRead() {
@@ -66,15 +109,16 @@ export const useNotificationsStore = defineStore('notifications', () => {
       await notificationsApi.markAllRead()
       notifications.value.forEach(n => { n.is_read = true })
       unreadCount.value = 0
-    } catch { /* silent */ }
+    } catch {}
   }
 
   return {
     notifications,
     unreadCount,
     loading,
-    startPolling,
-    stopPolling,
+    connected,
+    startWS,
+    stopWS,
     fetchNotifications,
     markRead,
     markAllRead,
