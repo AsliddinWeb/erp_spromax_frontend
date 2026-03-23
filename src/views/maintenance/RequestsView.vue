@@ -69,6 +69,14 @@
             :icon="Eye"
             @click.stop="openDetail(row)"
           />
+          <AppButton
+            v-if="hasRole(['superadmin','admin'])"
+            size="sm"
+            variant="ghost"
+            :icon="Trash2"
+            class="text-red-500 hover:text-red-700"
+            @click.stop="handleDelete(row)"
+          />
         </div>
       </template>
     </AppTable>
@@ -237,10 +245,11 @@
 <script setup>
 import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted } from 'vue'
-import { Search, Plus, CheckCircle, XCircle, Eye } from 'lucide-vue-next'
-import { warehouseApi } from '@/api'
+import { Search, Plus, CheckCircle, XCircle, Eye, Trash2 } from 'lucide-vue-next'
+import { warehouseApi, maintenanceApi } from '@/api'
 import { usePermission } from '@/composables/usePermission'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import AppTable from '@/components/ui/AppTable.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
@@ -251,6 +260,7 @@ import AppPagination from '@/components/ui/AppPagination.vue'
 
 const { hasRole } = usePermission()
 const toast = useToast()
+const confirm = useConfirm
 
 const data = ref([])
 const materialsData = ref([])
@@ -412,6 +422,23 @@ async function confirmReject() {
 function openDetail(row) {
   selectedRequest.value = row
   showDetailModal.value = true
+}
+
+async function handleDelete(row) {
+  const ok = await confirm({
+    title: 'O\'chirishni tasdiqlang',
+    message: `"${row.id}" so'rovni o'chirmoqchimisiz?`,
+    confirmText: 'O\'chirish',
+    variant: 'danger',
+  })
+  if (!ok) return
+  try {
+    await maintenanceApi.deleteRequest(row.id)
+    toast.success("So'rov o'chirildi!")
+    load()
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
+  }
 }
 
 function onPageChange(newPage) {

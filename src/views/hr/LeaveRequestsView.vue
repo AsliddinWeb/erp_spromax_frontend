@@ -50,9 +50,19 @@
       </template>
 
       <template #actions="{ row }">
-        <div class="flex gap-1" v-if="row.status === 'pending' && hasRole(['superadmin','admin','director','hr_manager'])">
-          <AppButton size="sm" variant="ghost" class="text-success hover:text-success" :icon="Check" @click.stop="approve(row)" title="Tasdiqlash" />
-          <AppButton size="sm" variant="ghost" class="text-danger hover:text-danger" :icon="X" @click.stop="openReject(row)" title="Rad etish" />
+        <div class="flex gap-1">
+          <template v-if="row.status === 'pending' && hasRole(['superadmin','admin','director','hr_manager'])">
+            <AppButton size="sm" variant="ghost" class="text-success hover:text-success" :icon="Check" @click.stop="approve(row)" title="Tasdiqlash" />
+            <AppButton size="sm" variant="ghost" class="text-danger hover:text-danger" :icon="X" @click.stop="openReject(row)" title="Rad etish" />
+          </template>
+          <AppButton
+            v-if="hasRole(['superadmin','admin'])"
+            size="sm"
+            variant="ghost"
+            :icon="Trash2"
+            class="text-red-500 hover:text-red-700"
+            @click.stop="handleDelete(row)"
+          />
         </div>
       </template>
     </AppTable>
@@ -186,10 +196,11 @@
 <script setup>
 import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted, watch } from 'vue'
-import { Plus, Check, X } from 'lucide-vue-next'
+import { Plus, Check, X, Trash2 } from 'lucide-vue-next'
 import { hrApi } from '@/api'
 import { usePermission } from '@/composables/usePermission'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import AppTable from '@/components/ui/AppTable.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
@@ -200,6 +211,7 @@ import AppPagination from '@/components/ui/AppPagination.vue'
 
 const { hasRole } = usePermission()
 const toast = useToast()
+const confirm = useConfirm
 
 const data = ref([])
 const employeesData = ref([])
@@ -364,6 +376,24 @@ async function save() {
     toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
   } finally {
     saving.value = false
+  }
+}
+
+async function handleDelete(row) {
+  const name = row.employee ? `${row.employee.first_name} ${row.employee.last_name}` : row.id
+  const ok = await confirm({
+    title: 'O\'chirishni tasdiqlang',
+    message: `"${name}" ta'til so'rovini o'chirmoqchimisiz?`,
+    confirmText: 'O\'chirish',
+    variant: 'danger',
+  })
+  if (!ok) return
+  try {
+    await hrApi.deleteLeaveRequest(row.id)
+    toast.success('So\'rov o\'chirildi!')
+    load()
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
   }
 }
 

@@ -53,6 +53,18 @@
       <template #payment_method="{ value }">
         <AppBadge variant="default">{{ methodLabel(value) }}</AppBadge>
       </template>
+      <template #actions="{ row }">
+        <div class="flex gap-1">
+          <AppButton
+            v-if="hasRole(['superadmin','admin'])"
+            size="sm"
+            variant="ghost"
+            :icon="Trash2"
+            class="text-red-500 hover:text-red-700"
+            @click.stop="handleDelete(row)"
+          />
+        </div>
+      </template>
     </AppTable>
 
     <AppPagination :page="page" :limit="limit" :total="total" @change="onPageChange" />
@@ -253,9 +265,11 @@
 <script setup>
 import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted } from 'vue'
-import { Plus, Calculator, Search, CheckCircle } from 'lucide-vue-next'
+import { Plus, Calculator, Search, CheckCircle, Trash2 } from 'lucide-vue-next'
 import { hrApi } from '@/api'
+import { usePermission } from '@/composables/usePermission'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import AppTable from '@/components/ui/AppTable.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
@@ -264,7 +278,9 @@ import AppModal from '@/components/ui/AppModal.vue'
 import AppBadge from '@/components/ui/AppBadge.vue'
 import AppPagination from '@/components/ui/AppPagination.vue'
 
+const { hasRole } = usePermission()
 const toast = useToast()
+const confirm = useConfirm
 
 const data = ref([])
 const employeesData = ref([])
@@ -321,6 +337,7 @@ const columns = [
   { key: 'deductions', label: 'Chegirma' },
   { key: 'total_amount', label: 'Jami' },
   { key: 'payment_method', label: 'Usul' },
+  { key: 'actions', label: '', width: '60px' },
 ]
 
 const employeeOptions = computed(() => [
@@ -391,6 +408,24 @@ function openCreate() {
   form.value = defaultForm()
   errors.value = {}
   showCreateModal.value = true
+}
+
+async function handleDelete(row) {
+  const name = row.employee ? `${row.employee.first_name} ${row.employee.last_name}` : row.id
+  const ok = await confirm({
+    title: 'O\'chirishni tasdiqlang',
+    message: `"${name}" ish haqi to'lovini o'chirmoqchimisiz?`,
+    confirmText: 'O\'chirish',
+    variant: 'danger',
+  })
+  if (!ok) return
+  try {
+    await hrApi.deleteSalaryPayment(row.id)
+    toast.success('To\'lov o\'chirildi!')
+    load()
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
+  }
 }
 
 function openDetail(row) {

@@ -52,6 +52,35 @@
       </div>
     </div>
 
+    <!-- UI Scale Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+          <ZoomIn class="w-5 h-5 text-green-600 dark:text-green-400" />
+        </div>
+        <div>
+          <h2 class="font-semibold text-gray-900 dark:text-white">Interfeys o'lchami</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Shrift va elementlar razmerini o'zgartirish</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <button
+          v-for="opt in scaleOptions"
+          :key="opt.value"
+          @click="applyScale(opt.value)"
+          :class="[
+            'px-4 py-2 rounded-lg border text-sm font-medium transition-colors',
+            currentScale === opt.value
+              ? 'bg-green-600 border-green-600 text-white'
+              : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+          ]"
+        >
+          {{ opt.label }}
+        </button>
+      </div>
+      <p class="text-xs text-gray-400 mt-3">Hozirgi: <strong class="text-gray-600 dark:text-gray-300">{{ scaleOptions.find(o => o.value === currentScale)?.label }}</strong></p>
+    </div>
+
     <!-- Other Settings -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <div class="flex items-center gap-3 mb-4">
@@ -100,12 +129,26 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { Clock, Save, Settings } from 'lucide-vue-next'
+import { Clock, Save, Settings, ZoomIn } from 'lucide-vue-next'
 import { settingsApi } from '@/api'
 import { useToast } from '@/composables/useToast'
+import { useThemeStore } from '@/stores/theme'
 import AppSpinner from '@/components/ui/AppSpinner.vue'
 
 const toast = useToast()
+const themeStore = useThemeStore()
+
+const scaleOptions = [
+  { value: 'normal',  label: 'Normal (100%)' },
+  { value: 'large',   label: 'Katta (110%)' },
+  { value: 'xlarge',  label: 'Kattaroq (120%)' },
+  { value: 'xxlarge', label: 'Eng katta (130%)' },
+]
+const currentScale = computed(() => themeStore.uiScale)
+
+function applyScale(val) {
+  themeStore.setScale(val)
+}
 
 const currentTz = ref('Asia/Tashkent')
 const selectedTz = ref('Asia/Tashkent')

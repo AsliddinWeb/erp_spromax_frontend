@@ -80,6 +80,18 @@
       <template #notes="{ value }">
         <span class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{{ value || '—' }}</span>
       </template>
+      <template #actions="{ row }">
+        <div class="flex gap-1">
+          <AppButton
+            v-if="hasRole(['superadmin','admin'])"
+            size="sm"
+            variant="ghost"
+            :icon="Trash2"
+            class="text-red-500 hover:text-red-700"
+            @click.stop="handleDelete(row)"
+          />
+        </div>
+      </template>
     </AppTable>
 
     <AppPagination :page="page" :limit="limit" :total="filteredData.length" @change="p => page = p" />
@@ -134,9 +146,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { formatDateTime } from '@/composables/useDate'
-import { Search, Info } from 'lucide-vue-next'
+import { Search, Info, Trash2 } from 'lucide-vue-next'
 import { salesApi } from '@/api'
+import { usePermission } from '@/composables/usePermission'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import AppTable from '@/components/ui/AppTable.vue'
 import AppInput from '@/components/ui/AppInput.vue'
 import AppSelect from '@/components/ui/AppSelect.vue'
@@ -145,7 +159,9 @@ import AppModal from '@/components/ui/AppModal.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppPagination from '@/components/ui/AppPagination.vue'
 
+const { hasRole } = usePermission()
 const toast = useToast()
+const confirm = useConfirm
 
 const data = ref([])
 const loading = ref(false)
@@ -172,6 +188,7 @@ const columns = [
   { key: 'payment_method', label: "To'lov usuli" },
   { key: 'transaction_id', label: 'Tranzaksiya ID' },
   { key: 'notes', label: 'Izoh' },
+  { key: 'actions', label: '', width: '60px' },
 ]
 
 const filteredData = computed(() => {
@@ -220,6 +237,23 @@ function methodLabel(m) {
 function formatMoney(val) {
   return Number(val || 0).toLocaleString('uz-UZ')
 }
+async function handleDelete(row) {
+  const ok = await confirm({
+    title: 'O\'chirishni tasdiqlang',
+    message: 'Bu to\'lovni o\'chirmoqchimisiz?',
+    confirmText: 'O\'chirish',
+    variant: 'danger',
+  })
+  if (!ok) return
+  try {
+    await salesApi.deletePayment(row.id)
+    toast.success('To\'lov o\'chirildi!')
+    load()
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
+  }
+}
+
 function openDetail(row) {
   selectedPayment.value = row
   showDetail.value = true

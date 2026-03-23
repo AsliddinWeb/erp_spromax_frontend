@@ -75,6 +75,14 @@
             @click.stop="openPayment(row)"
           />
           <AppButton size="sm" variant="ghost" :icon="Eye" @click.stop="openDetail(row)" />
+          <AppButton
+            v-if="hasRole(['superadmin','admin'])"
+            size="sm"
+            variant="ghost"
+            :icon="Trash2"
+            class="text-red-500 hover:text-red-700"
+            @click.stop="handleDelete(row)"
+          />
         </div>
       </template>
     </AppTable>
@@ -377,6 +385,7 @@ import { Search, Plus, Edit, Eye, CreditCard, Trash2, ShoppingCart } from 'lucid
 import { salesApi, productionApi } from '@/api'
 import { usePermission } from '@/composables/usePermission'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import AppTable from '@/components/ui/AppTable.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
@@ -387,6 +396,7 @@ import AppPagination from '@/components/ui/AppPagination.vue'
 
 const { hasRole } = usePermission()
 const toast = useToast()
+const confirm = useConfirm
 
 const data = ref([])
 const customersData = ref([])
@@ -667,6 +677,24 @@ async function savePayment() {
 }
 
 function openDetail(row) { selectedOrder.value = row; showDetailModal.value = true }
+
+async function handleDelete(row) {
+  const ok = await confirm({
+    title: 'O\'chirishni tasdiqlang',
+    message: `"${row.order_number || row.id}" buyurtmani o'chirmoqchimisiz?`,
+    confirmText: 'O\'chirish',
+    variant: 'danger',
+  })
+  if (!ok) return
+  try {
+    await salesApi.deleteOrder(row.id)
+    toast.success("Buyurtma o'chirildi!")
+    load()
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
+  }
+}
+
 function onPageChange(p) { page.value = p; load() }
 onMounted(load)
 </script>

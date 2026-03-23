@@ -2,7 +2,7 @@
   <div class="space-y-6">
 
     <!-- Welcome -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-start justify-between flex-wrap gap-3">
       <div>
         <h2 class="text-xl font-bold text-gray-900 dark:text-white">
           Xush kelibsiz, {{ firstName }} 👋
@@ -13,7 +13,7 @@
       </div>
       <button
         @click="load"
-        class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border border-gray-200 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-700 text-gray-600 dark:text-gray-300 transition-all"
+        class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl border border-gray-200 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-700 text-gray-600 dark:text-gray-300 transition-all flex-shrink-0"
       >
         <RefreshCw class="w-3.5 h-3.5" :class="loading ? 'animate-spin' : ''" />
         Yangilash

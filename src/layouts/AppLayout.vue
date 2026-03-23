@@ -139,10 +139,12 @@
           <Sun v-if="isDark" class="w-4 h-4" />
           <Moon v-else class="w-4 h-4" />
         </button>
+        <button @click="toggleFullscreen" class="hidden sm:flex p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-700 text-gray-500 dark:text-gray-400 transition-colors" :title="isFullscreen ? 'Kichraytirish' : 'To\'liq ekran'">
+          <Minimize2 v-if="isFullscreen" class="w-4 h-4" />
+          <Maximize2 v-else class="w-4 h-4" />
+        </button>
 
-        <div class="hidden sm:block">
-          <NotificationPanel />
-        </div>
+        <NotificationPanel />
 
         <!-- Profile dropdown -->
         <div class="relative" ref="profileRef">
@@ -221,7 +223,8 @@ import { useRoute, useRouter } from 'vue-router'
 import {
   LayoutDashboard, Package, Factory, ShoppingCart,
   Wallet, Users, Wrench, UserCog, BarChart2, Settings2,
-  Menu, Sun, Moon, ChevronDown, ChevronLeft, LogOut, KeyRound, UserCircle
+  Menu, Sun, Moon, ChevronDown, ChevronLeft, LogOut, KeyRound, UserCircle,
+  Maximize2, Minimize2
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
@@ -245,6 +248,7 @@ const collapsed = ref(localStorage.getItem('sidebar_collapsed') === 'true')
 const profileOpen = ref(false)
 const profileRef = ref(null)
 const isDark = ref(document.documentElement.classList.contains('dark'))
+const isFullscreen = ref(!!document.fullscreenElement)
 const showPasswordModal = ref(false)
 const pwSaving = ref(false)
 const pwErrors = ref({})
@@ -321,6 +325,18 @@ function toggleDark() {
   localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
 }
 
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen()
+  } else {
+    document.exitFullscreen()
+  }
+}
+
+function onFullscreenChange() {
+  isFullscreen.value = !!document.fullscreenElement
+}
+
 function openChangePassword() {
   profileOpen.value = false
   pwForm.value = { old_password: '', new_password: '', confirm_password: '' }
@@ -363,9 +379,13 @@ function handleClickOutside(e) {
 }
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  document.addEventListener('fullscreenchange', onFullscreenChange)
   notifStore.startPolling()
 })
-onUnmounted(() => document.removeEventListener('click', handleClickOutside))
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('fullscreenchange', onFullscreenChange)
+})
 </script>
 
 <style scoped>

@@ -161,6 +161,14 @@
               :icon="row.is_active ? EyeOff : Eye"
               @click.stop="toggleStatus(row)"
             />
+            <AppButton
+              v-if="hasRole(['superadmin','admin'])"
+              size="sm"
+              variant="ghost"
+              :icon="Trash2"
+              class="text-red-500 hover:text-red-700"
+              @click.stop="handleDelete(row)"
+            />
           </div>
         </template>
       </AppTable>
@@ -245,10 +253,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Search, Plus, Edit, Eye, EyeOff, Boxes, List, Clock } from 'lucide-vue-next'
+import { Search, Plus, Edit, Eye, EyeOff, Boxes, List, Clock, Trash2 } from 'lucide-vue-next'
 import { productionApi } from '@/api'
 import { usePermission } from '@/composables/usePermission'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { formatDate, formatDateTime } from '@/composables/useDate'
 import AppTable from '@/components/ui/AppTable.vue'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -260,6 +269,7 @@ import AppPagination from '@/components/ui/AppPagination.vue'
 
 const { hasRole } = usePermission()
 const toast = useToast()
+const confirm = useConfirm
 
 // State
 const activeTab = ref('stock')
@@ -397,6 +407,23 @@ async function save() {
     saving.value = false
   }
 }
+async function handleDelete(row) {
+  const ok = await confirm({
+    title: 'O\'chirishni tasdiqlang',
+    message: `"${row.name}" mahsulotni o'chirmoqchimisiz?`,
+    confirmText: 'O\'chirish',
+    variant: 'danger',
+  })
+  if (!ok) return
+  try {
+    await productionApi.deleteFinishedProduct(row.id)
+    toast.success("Mahsulot o'chirildi!")
+    load()
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
+  }
+}
+
 async function toggleStatus(row) {
   try {
     await productionApi.updateFinishedProduct(row.id, { is_active: !row.is_active })

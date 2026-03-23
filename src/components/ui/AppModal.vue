@@ -52,7 +52,7 @@ const props = defineProps({
   modelValue:      { type: Boolean, default: false },
   title:           { type: String, default: '' },
   size:            { type: String, default: 'md' },
-  closeOnBackdrop: { type: Boolean, default: true },
+  closeOnBackdrop: { type: Boolean, default: false },
 })
 defineEmits(['update:modelValue'])
 

@@ -7,6 +7,24 @@
           {{ value }}<span v-if="unit" class="text-sm font-normal text-gray-500 ml-1">{{ unit }}</span>
         </p>
         <p v-if="sub" class="text-xs text-gray-400 mt-0.5">{{ sub }}</p>
+
+        <!-- Badge yoki trend -->
+        <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+          <span
+            v-if="badge"
+            class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold"
+            :class="badgeClass"
+          >{{ badge }}</span>
+          <span
+            v-if="trend"
+            class="inline-flex items-center gap-0.5 text-[11px] font-semibold"
+            :class="trendClass"
+          >
+            <span v-if="trend.startsWith('+')" class="text-[10px]">▲</span>
+            <span v-else-if="trend.startsWith('-')" class="text-[10px]">▼</span>
+            {{ trend }}
+          </span>
+        </div>
       </div>
       <div
         v-if="icon"
@@ -22,15 +40,35 @@
 <script setup>
 import { computed } from 'vue'
 
-// icon type intentionally omitted — accepts Object, Function, or String (component name)
 const props = defineProps({
-  label: String,
-  value: [String, Number],
-  unit:  String,
-  sub:   String,
-  color: { default: 'primary' },
-  icon:  { default: null },
+  label:     String,
+  value:     [String, Number],
+  unit:      String,
+  sub:       String,
+  color:     { default: 'primary' },
+  icon:      { default: null },
+  badge:     { type: String, default: '' },
+  badgeType: { type: String, default: 'default' },
+  trend:     { type: String, default: '' },
+  trendType: { type: String, default: 'success' },
 })
+
+const badgeColorMap = {
+  success: 'bg-success/10 text-success',
+  warning: 'bg-warning/10 text-warning',
+  danger:  'bg-danger/10 text-danger',
+  info:    'bg-info/10 text-info',
+  primary: 'bg-primary/10 text-primary',
+  default: 'bg-gray-100 dark:bg-dark-700 text-gray-500 dark:text-gray-400',
+}
+const trendColorMap = {
+  success: 'text-success',
+  danger:  'text-danger',
+  warning: 'text-warning',
+}
+
+const badgeClass = computed(() => badgeColorMap[props.badgeType] || badgeColorMap.default)
+const trendClass = computed(() => trendColorMap[props.trendType] || trendColorMap.success)
 
 const colorMap = {
   primary: { value: 'text-primary', bg: 'bg-primary/10', icon: 'text-primary' },

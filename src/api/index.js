@@ -46,6 +46,8 @@ export const warehouseApi = {
   getMyRequests: (params) => api.get('/warehouse/requests/my', { params }),
   getMaterialRequest: (id) => api.get(`/warehouse/requests/${id}`),
   createMaterialRequest: (data) => api.post('/warehouse/requests', data),
+  deleteReceipt: (id) => api.delete(`/warehouse/receipts/${id}`),
+  deleteMaterialRequest: (id) => api.delete(`/warehouse/requests/${id}`),
   approveRequest: (id, data) => api.put(`/warehouse/requests/${id}/approve`, data),
   rejectRequest: (id, data) => api.put(`/warehouse/requests/${id}/reject`, data),
 
@@ -77,6 +79,7 @@ export const productionApi = {
   getMyShifts: (params) => api.get('/production/shifts/my', { params }),
   getShift: (id) => api.get(`/production/shifts/${id}`),
   createShift: (data) => api.post('/production/shifts', data),
+  deleteShift: (id) => api.delete(`/production/shifts/${id}`),
   completeShift: (id, data) => api.put(`/production/shifts/${id}/complete`, data),
 
   recordMaterialUsage: (shiftId, data) => api.post(`/production/shifts/${shiftId}/records/materials`, data),
@@ -89,6 +92,7 @@ export const productionApi = {
 
   getDefectReasons: (params) => api.get('/production/defect-reasons', { params }),
   createDefectReason: (data) => api.post('/production/defect-reasons', data),
+  deleteDefectReason: (id) => api.delete(`/production/defect-reasons/${id}`),
 
   getStatistics: () => api.get('/production/statistics'),
 
@@ -129,6 +133,7 @@ export const salesApi = {
   getAllPayments: (params) => api.get('/sales/payments', { params }),
 
   createPayment: (data) => api.post('/sales/payments', data),
+  deletePayment: (id) => api.delete(`/sales/payments/${id}`),
 
   getStatistics: () => api.get('/sales/statistics'),
 }
@@ -175,17 +180,20 @@ export const hrApi = {
   getTodayAttendance: ()       => api.get('/hr/attendances/today'),
   createAttendance:  (data)    => api.post('/hr/attendances', data),
   updateAttendance:  (id, data) => api.put(`/hr/attendances/${id}`, data),
+  deleteAttendance:  (id)      => api.delete(`/hr/attendances/${id}`),
 
   // Ish haqi
   getSalaryPayments:    (params) => api.get('/hr/salary-payments', { params }),
   createSalaryPayment:  (data)   => api.post('/hr/salary-payments', data),
   calculateSalaryPreview: (month) => api.get('/hr/salary-payments/calculate-preview', { params: { month } }),
   batchSalaryPayment:   (data)   => api.post('/hr/salary-payments/batch', data),
+  deleteSalaryPayment:  (id)     => api.delete(`/hr/salary-payments/${id}`),
 
   // Ta'til so'rovlari
   getLeaveRequests:    (params) => api.get('/hr/leave-requests', { params }),
   createLeaveRequest:  (data)   => api.post('/hr/leave-requests', data),
   approveLeaveRequest: (id, data) => api.put(`/hr/leave-requests/${id}/approve`, data),
+  deleteLeaveRequest:  (id)     => api.delete(`/hr/leave-requests/${id}`),
 
   // Statistika
   getStatistics: () => api.get('/hr/statistics'),
@@ -203,6 +211,7 @@ export const maintenanceApi = {
 
   // Ish jurnali
   createLog: (data) => api.post('/maintenance/logs', data),
+  deleteLog: (id) => api.delete(`/maintenance/logs/${id}`),
 
   // Ehtiyot qismlar
   getSpareParts:    (params)   => api.get('/maintenance/spare-parts', { params }),
@@ -211,6 +220,7 @@ export const maintenanceApi = {
   updateSparePart:  (id, data) => api.put(`/maintenance/spare-parts/${id}`, data),
   deleteSparePart:  (id)       => api.delete(`/maintenance/spare-parts/${id}`),
   createSparePartUsage: (data) => api.post('/maintenance/spare-part-usage', data),
+  deleteSparePartUsage: (id) => api.delete(`/maintenance/spare-part-usage/${id}`),
 
   // Jadval
   getSchedules:   (params)     => api.get('/maintenance/schedules', { params }),
