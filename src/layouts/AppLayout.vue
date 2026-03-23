@@ -220,7 +220,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   LayoutDashboard, Package, Factory, ShoppingCart,
-  Wallet, Users, Wrench, UserCog, BarChart2,
+  Wallet, Users, Wrench, UserCog, BarChart2, Settings2,
   Menu, Sun, Moon, ChevronDown, ChevronLeft, LogOut, KeyRound, UserCircle
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
@@ -278,8 +278,9 @@ const navGroups = [
     items: [
       { to: '/hr',          label: 'Kadrlar',          icon: Users,        roles: ['superadmin','admin','director','hr_manager'] },
       { to: '/maintenance', label: 'Texnik xizmat',    icon: Wrench,       roles: ['superadmin','admin','director','maintenance','production_manager','operator'] },
-      { to: '/users',       label: 'Foydalanuvchilar', icon: UserCog,      roles: ['superadmin','admin'] },
-      { to: '/analytics',   label: 'Tahlil',           icon: BarChart2,    roles: ['superadmin','admin','director'] },
+      { to: '/users',           label: 'Foydalanuvchilar', icon: UserCog,      roles: ['superadmin','admin'] },
+      { to: '/analytics',       label: 'Tahlil',           icon: BarChart2,    roles: ['superadmin','admin','director'] },
+      { to: '/system-settings', label: 'Tizim Sozlamalari', icon: Settings2,   roles: ['superadmin'] },
     ]
   }
 ]
@@ -293,6 +294,7 @@ const pageTitle = computed(() => {
     '/': 'Dashboard', '/warehouse': 'Ombor', '/production': 'Ishlab chiqarish',
     '/sales': 'Sotuv', '/finance': 'Moliya', '/hr': 'Kadrlar bo\'limi',
     '/maintenance': 'Texnik xizmat', '/users': 'Foydalanuvchilar', '/analytics': 'Tahlil',
+    '/system-settings': 'Tizim Sozlamalari',
     '/profile': 'Profil',
   }
   return map[route.path] || 'ERP Tizimi'

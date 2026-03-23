@@ -448,7 +448,7 @@
 </template>
 
 <script setup>
-import { formatDateTime } from '@/composables/useDate'
+import { formatDateTime, nowLocalISO } from '@/composables/useDate'
 import { ref, computed, onMounted, watch } from 'vue'
 import {
   Plus, Eye, CheckSquare, User, Play, PauseCircle,
@@ -691,7 +691,7 @@ async function saveCreate() {
   if (!form.value.production_line_id) { errors.value.production_line_id = 'Liniyani tanlang'; return }
   saving.value = true
   try {
-    await productionApi.createShift({ ...form.value, start_time: new Date().toISOString() })
+    await productionApi.createShift({ ...form.value, start_time: nowLocalISO() })
     toast.success('Smena boshlandi!')
     showCreateModal.value = false
     load()
@@ -813,7 +813,7 @@ async function doClose() {
   saving.value = true
   try {
     await productionApi.closeShift(selectedShift.value.id, {
-      end_time: new Date().toISOString(),
+      end_time: nowLocalISO(),
       notes: closeForm.value.notes || null,
       outputs: closeForm.value.outputs.filter(i => i.finished_product_id && i.quantity_produced).map(i => ({ finished_product_id: i.finished_product_id, quantity_produced: parseFloat(i.quantity_produced) })),
       scraps: closeForm.value.scraps.filter(i => i.finished_product_id && i.quantity).map(i => ({ finished_product_id: i.finished_product_id, quantity: parseFloat(i.quantity), defect_reason_id: i.defect_reason_id || null })),

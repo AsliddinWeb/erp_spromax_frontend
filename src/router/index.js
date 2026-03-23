@@ -44,7 +44,8 @@ const routes = [
       { path: 'maintenance', name: 'Maintenance', component: () => import('@/views/maintenance/MaintenanceView.vue') },
       { path: 'users',       name: 'Users',       component: () => import('@/views/users/UsersView.vue') },
       { path: 'analytics',   name: 'Analytics',   component: () => import('@/views/analytics/AnalyticsView.vue') },
-      { path: 'profile',     name: 'Profile',     component: () => import('@/views/profile/ProfileView.vue') },
+      { path: 'profile',          name: 'Profile',         component: () => import('@/views/profile/ProfileView.vue') },
+      { path: 'system-settings', name: 'SystemSettings',  component: () => import('@/views/settings/SystemSettingsView.vue') },
     ]
   },
   { path: '/:pathMatch(.*)*', redirect: '/404' }

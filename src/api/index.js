@@ -237,6 +237,14 @@ export const analyticsApi = {
   getAlerts:      ()       => api.get('/analytics/quick-stats/alerts'),
 }
 
+// ─── SYSTEM SETTINGS ──────────────────────────────────
+export const settingsApi = {
+  getAll:           ()         => api.get('/settings'),
+  getTimezone:      ()         => api.get('/settings/timezone'),
+  updateTimezone:   (data)     => api.put('/settings/timezone', data),
+  updateSetting:    (key, data) => api.put(`/settings/${key}`, data),
+}
+
 // ─── NOTIFICATIONS ────────────────────────────────────
 export const notificationsApi = {
   getAll:        (params) => api.get('/notifications', { params }),
