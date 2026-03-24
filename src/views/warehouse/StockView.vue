@@ -113,6 +113,17 @@
       <template #total_price="{ value }">
         <span class="font-medium">{{ formatMoney(value) }} so'm</span>
       </template>
+
+      <template #receipt_actions="{ row }">
+        <AppButton
+          v-if="hasRole(['superadmin'])"
+          size="sm"
+          variant="ghost"
+          :icon="Trash2"
+          class="text-red-500 hover:text-red-700"
+          @click.stop="handleDeleteReceipt(row)"
+        />
+      </template>
     </AppTable>
 
     <!-- Pagination -->
@@ -250,7 +261,7 @@ const stockColumns = computed(() => [
   ...(hasRole(['superadmin']) ? [{ key: 'actions', label: '', width: '60px' }] : []),
 ])
 
-const receiptColumns = [
+const receiptColumns = computed(() => [
   { key: 'batch_number', label: 'Partiya №' },
   { key: 'raw_material.name', label: 'Material' },
   { key: 'supplier.name', label: 'Yetkazib beruvchi' },
@@ -258,7 +269,8 @@ const receiptColumns = [
   { key: 'unit_price', label: 'Birlik narxi' },
   { key: 'total_price', label: 'Jami' },
   { key: 'receipt_date', label: 'Sana' },
-]
+  ...(hasRole(['superadmin']) ? [{ key: 'receipt_actions', label: '', width: '60px' }] : []),
+])
 
 const supplierOptions = computed(() =>
   suppliersData.value.map(s => ({ value: s.id, label: s.name }))
@@ -360,6 +372,23 @@ async function saveReceipt() {
     toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
   } finally {
     saving.value = false
+  }
+}
+
+async function handleDeleteReceipt(row) {
+  const ok = await confirm({
+    title: 'Kirimni o\'chirish',
+    message: `"${row.raw_material?.name}" kirim yozuvini o\'chirmoqchimisiz?`,
+    confirmText: 'O\'chirish',
+    variant: 'danger',
+  })
+  if (!ok) return
+  try {
+    await warehouseApi.deleteReceipt(row.id)
+    toast.success('Kirim o\'chirildi!')
+    loadAll()
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
   }
 }
 
