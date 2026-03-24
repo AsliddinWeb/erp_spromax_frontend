@@ -101,6 +101,11 @@
           <AppInput v-model="form.inn" label="INN" placeholder="123456789" />
           <AppInput v-model="form.address" label="Manzil" placeholder="Shahar, ko'cha..." />
         </div>
+        <AppSelect
+          v-model="form.user_id"
+          label="Tizim foydalanuvchisi"
+          :options="userSelectOptions"
+        />
       </form>
       <template #footer>
         <AppButton variant="secondary" @click="showModal = false">Bekor qilish</AppButton>
@@ -161,6 +166,16 @@
             <p class="text-gray-500 dark:text-gray-400">INN</p>
             <p class="font-medium text-gray-900 dark:text-white">{{ selectedEmployee.inn }}</p>
           </div>
+          <div>
+            <p class="text-gray-500 dark:text-gray-400">Tizim foydalanuvchisi</p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              <span v-if="selectedEmployee.user">
+                {{ selectedEmployee.user.full_name }}
+                <span class="text-xs text-gray-400">({{ selectedEmployee.user.username }})</span>
+              </span>
+              <span v-else class="text-gray-400">Bog'lanmagan</span>
+            </p>
+          </div>
         </div>
       </div>
       <template #footer>
@@ -175,7 +190,7 @@
 import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted } from 'vue'
 import { Search, Plus, Edit, Eye, EyeOff, Trash2 } from 'lucide-vue-next'
-import { hrApi } from '@/api'
+import { hrApi, usersApi } from '@/api'
 import { usePermission } from '@/composables/usePermission'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
@@ -193,6 +208,7 @@ const confirm = useConfirm
 
 const data = ref([])
 const deptsData = ref([])
+const usersData = ref([])
 const loading = ref(false)
 const saving = ref(false)
 const showModal = ref(false)
@@ -246,6 +262,10 @@ const deptOptions = computed(() => [
 const deptSelectOptions = computed(() =>
   deptsData.value.map(d => ({ value: d.id, label: d.name }))
 )
+const userSelectOptions = computed(() => [
+  { value: null, label: '— Bog\'lanmagan —' },
+  ...usersData.value.map(u => ({ value: u.id, label: `${u.full_name} (${u.role?.name || u.username})` }))
+])
 
 const filteredData = computed(() => {
   let result = data.value
@@ -278,13 +298,15 @@ function formatMoney(val) {
 async function load() {
   loading.value = true
   try {
-    const [empRes, deptRes] = await Promise.all([
+    const [empRes, deptRes, userRes] = await Promise.all([
       hrApi.getEmployees({ page: page.value, limit: limit.value }),
       hrApi.getDepartments({ limit: 100 }),
+      usersApi.getUsers({ limit: 100 }),
     ])
     data.value = empRes.data?.items || empRes.data || []
     total.value = empRes.data?.total || data.value.length
     deptsData.value = deptRes.data?.items || deptRes.data || []
+    usersData.value = userRes.data?.items || userRes.data || []
   } catch {
     toast.error("Ma'lumotlarni yuklashda xatolik")
   } finally {
