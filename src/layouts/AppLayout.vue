@@ -329,7 +329,9 @@ const pageTitle = computed(() => {
     '/notifications': 'Bildirishnomalar',
     '/profile': 'Profil',
   }
-  return map[route.path] || 'ERP Tizimi'
+  const title = map[route.path] || 'ERP Tizimi'
+  document.title = `${title} | S Promax Plast`
+  return title
 })
 
 const userInitial = computed(() => {
