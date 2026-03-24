@@ -116,6 +116,14 @@
             {{ row.finished_product?.standard_price ? formatMoney(row.finished_product.standard_price) + " so'm" : '—' }}
           </span>
         </template>
+
+        <template #stock_actions="{ row }">
+          <AppButton
+            size="sm" variant="ghost" :icon="Trash2"
+            class="text-red-500 hover:text-red-700"
+            @click.stop="handleDeleteStock(row)"
+          />
+        </template>
       </AppTable>
     </div>
 
@@ -301,14 +309,15 @@ const statusOptions = [
 ]
 
 // Columns
-const stockColumns = [
+const stockColumns = computed(() => [
   { key: 'finished_product', label: 'Mahsulot' },
   { key: 'quantity_available', label: 'Mavjud' },
   { key: 'quantity_reserved', label: 'Rezerv' },
   { key: 'quantity_total', label: 'Jami' },
   { key: 'standard_price', label: 'Narxi' },
   { key: 'last_updated', label: 'Yangilangan' },
-]
+  ...(hasRole(['superadmin']) ? [{ key: 'stock_actions', label: '', width: '60px' }] : []),
+])
 const catalogColumns = [
   { key: 'name', label: 'Nomi', sortable: true },
   { key: 'unit', label: "Olchov" },
@@ -418,6 +427,23 @@ async function handleDelete(row) {
   try {
     await productionApi.deleteFinishedProduct(row.id)
     toast.success("Mahsulot o'chirildi!")
+    load()
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
+  }
+}
+
+async function handleDeleteStock(row) {
+  const ok = await confirm({
+    title: 'Omborni o\'chirish',
+    message: `"${row.finished_product?.name}" ombor yozuvini o\'chirmoqchimisiz?`,
+    confirmText: 'O\'chirish',
+    variant: 'danger',
+  })
+  if (!ok) return
+  try {
+    await productionApi.deleteFinishedStock(row.id)
+    toast.success('Ombor yozuvi o\'chirildi!')
     load()
   } catch (e) {
     toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')

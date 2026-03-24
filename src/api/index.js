@@ -73,6 +73,8 @@ export const productionApi = {
 
   getFinishedProducts: (params) => api.get('/production/finished-products', { params }),
   getFinishedStock: () => api.get('/production/finished-stock'),
+  deleteFinishedStock: (id) => api.delete(`/production/finished-stock/${id}`),
+  deleteScrapStock: (id) => api.delete(`/production/scrap-stock/${id}`),
   getFinishedProduct: (id) => api.get(`/production/finished-products/${id}`),
   createFinishedProduct: (data) => api.post('/production/finished-products', data),
   updateFinishedProduct: (id, data) => api.put(`/production/finished-products/${id}`, data),

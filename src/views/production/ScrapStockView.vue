@@ -65,6 +65,14 @@
           <span class="font-semibold" :class="value > 0 ? 'text-success' : 'text-gray-400'">{{ value }}</span>
         </template>
         <template #last_updated="{ value }">{{ formatDate(value) }}</template>
+        <template #recycled_actions="{ row }">
+          <AppButton
+            v-if="hasRole(['superadmin'])"
+            size="sm" variant="ghost" :icon="Trash2"
+            class="text-red-500 hover:text-red-700"
+            @click.stop="handleDeleteScrap(row)"
+          />
+        </template>
       </AppTable>
     </div>
 
@@ -93,12 +101,20 @@
         </template>
         <template #last_updated="{ value }">{{ formatDate(value) }}</template>
         <template #actions="{ row }">
-          <AppButton
-            v-if="hasRole(['superadmin','admin','director','production_manager']) && row.quantity > 0"
-            size="sm" variant="ghost" :icon="RefreshCcw"
-            class="text-success"
-            @click.stop="openGrinderForProduct(row)"
-          />
+          <div class="flex gap-1">
+            <AppButton
+              v-if="hasRole(['superadmin','admin','director','production_manager']) && row.quantity > 0"
+              size="sm" variant="ghost" :icon="RefreshCcw"
+              class="text-success"
+              @click.stop="openGrinderForProduct(row)"
+            />
+            <AppButton
+              v-if="hasRole(['superadmin'])"
+              size="sm" variant="ghost" :icon="Trash2"
+              class="text-red-500 hover:text-red-700"
+              @click.stop="handleDeleteScrap(row)"
+            />
+          </div>
         </template>
       </AppTable>
     </div>
@@ -197,10 +213,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { RefreshCcw } from 'lucide-vue-next'
+import { RefreshCcw, Trash2 } from 'lucide-vue-next'
 import { productionApi, warehouseApi } from '@/api'
 import { usePermission } from '@/composables/usePermission'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { formatDate, formatDateTime } from '@/composables/useDate'
 import AppTable from '@/components/ui/AppTable.vue'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -211,6 +228,7 @@ import AppBadge from '@/components/ui/AppBadge.vue'
 
 const { hasRole } = usePermission()
 const toast = useToast()
+const confirm = useConfirm
 
 const stockData = ref([])
 const transactions = ref([])
@@ -223,17 +241,18 @@ const activeTab = ref('recycled')
 const grinderErrors = ref({})
 const grinderForm = ref({ input_product_id: '', input_quantity: '', output_raw_material_id: '', output_quantity: '', notes: '' })
 
-const recycledColumns = [
+const recycledColumns = computed(() => [
   { key: 'mahsulot', label: 'Xom ashyo' },
   { key: 'quantity', label: 'Qoldiq' },
   { key: 'last_updated', label: 'Oxirgi yangilanish' },
-]
-const brakColumns = [
+  ...(hasRole(['superadmin']) ? [{ key: 'recycled_actions', label: '', width: '60px' }] : []),
+])
+const brakColumns = computed(() => [
   { key: 'mahsulot', label: 'Mahsulot' },
   { key: 'quantity', label: 'Qoldiq' },
   { key: 'last_updated', label: 'Oxirgi yangilanish' },
   { key: 'actions', label: '', width: '60px' },
-]
+])
 const txnColumns = [
   { key: 'txn_mahsulot', label: 'Mahsulot' },
   { key: 'transaction_type', label: 'Turi' },
@@ -301,6 +320,24 @@ async function load() {
   } finally {
     loading.value = false
     txnLoading.value = false
+  }
+}
+
+async function handleDeleteScrap(row) {
+  const name = row.raw_material?.name || row.finished_product?.name || 'Yozuv'
+  const ok = await confirm({
+    title: 'Atxot yozuvini o\'chirish',
+    message: `"${name}" atxot yozuvini o\'chirmoqchimisiz?`,
+    confirmText: 'O\'chirish',
+    variant: 'danger',
+  })
+  if (!ok) return
+  try {
+    await productionApi.deleteScrapStock(row.id)
+    toast.success('Atxot yozuvi o\'chirildi!')
+    load()
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
   }
 }
 
