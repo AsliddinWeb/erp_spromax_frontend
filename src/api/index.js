@@ -52,6 +52,8 @@ export const warehouseApi = {
   rejectRequest: (id, data) => api.put(`/warehouse/requests/${id}/reject`, data),
 
   getStatistics: () => api.get('/warehouse/statistics'),
+
+  getProductionReceipts: (params) => api.get('/warehouse/production-receipts', { params }),
 }
 
 // ─── PRODUCTION ───────────────────────────────────────
