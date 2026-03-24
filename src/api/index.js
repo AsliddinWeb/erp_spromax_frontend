@@ -40,6 +40,7 @@ export const warehouseApi = {
 
   getStock: (params) => api.get('/warehouse/stock', { params }),
   getStockByMaterial: (id) => api.get(`/warehouse/stock/${id}`),
+  deleteStock: (id) => api.delete(`/warehouse/stock/${id}`),
   getLowStock: () => api.get('/warehouse/low-stock'),
 
   getMaterialRequests: (params) => api.get('/warehouse/requests', { params }),

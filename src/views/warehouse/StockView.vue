@@ -86,6 +86,17 @@
           {{ isLowStock(row) ? 'Kam' : 'Yetarli' }}
         </AppBadge>
       </template>
+
+      <template #actions="{ row }">
+        <AppButton
+          v-if="hasRole(['superadmin'])"
+          size="sm"
+          variant="ghost"
+          :icon="Trash2"
+          class="text-red-500 hover:text-red-700"
+          @click.stop="handleDeleteStock(row)"
+        />
+      </template>
     </AppTable>
 
     <!-- Receipts Table -->
@@ -186,10 +197,11 @@
 <script setup>
 import { todayISO, nowLocalISO, startOfMonthISO, startOfYearISO, formatDate, formatDateTime } from '@/composables/useDate'
 import { ref, computed, onMounted } from 'vue'
-import { Search, Plus, AlertTriangle } from 'lucide-vue-next'
+import { Search, Plus, AlertTriangle, Trash2 } from 'lucide-vue-next'
 import { warehouseApi } from '@/api'
 import { usePermission } from '@/composables/usePermission'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import AppTable from '@/components/ui/AppTable.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
@@ -201,6 +213,7 @@ import AppPagination from '@/components/ui/AppPagination.vue'
 
 const { hasRole } = usePermission()
 const toast = useToast()
+const confirm = useConfirm
 
 const stockData = ref([])
 const receiptsData = ref([])
@@ -228,13 +241,14 @@ const defaultReceiptForm = () => ({
 })
 const receiptForm = ref(defaultReceiptForm())
 
-const stockColumns = [
+const stockColumns = computed(() => [
   { key: 'raw_material.name', label: 'Material nomi', sortable: true },
   { key: 'raw_material.unit', label: "O'lchov" },
   { key: 'stock_level', label: 'Zaxira miqdori' },
   { key: 'status', label: 'Holat' },
   { key: 'last_updated', label: 'Oxirgi yangilanish' },
-]
+  ...(hasRole(['superadmin']) ? [{ key: 'actions', label: '', width: '60px' }] : []),
+])
 
 const receiptColumns = [
   { key: 'batch_number', label: 'Partiya №' },
@@ -346,6 +360,23 @@ async function saveReceipt() {
     toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
   } finally {
     saving.value = false
+  }
+}
+
+async function handleDeleteStock(row) {
+  const ok = await confirm({
+    title: 'Zaxirani o\'chirish',
+    message: `"${row.raw_material?.name}" zaxira yozuvini o\'chirmoqchimisiz? Bu amalni qaytarib bo\'lmaydi.`,
+    confirmText: 'O\'chirish',
+    variant: 'danger',
+  })
+  if (!ok) return
+  try {
+    await warehouseApi.deleteStock(row.id)
+    toast.success('Zaxira o\'chirildi!')
+    loadAll()
+  } catch (e) {
+    toast.error(e.response?.data?.detail || 'Xatolik yuz berdi')
   }
 }
 
